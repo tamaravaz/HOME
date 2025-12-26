@@ -20,7 +20,7 @@ You can install the development version of HOME directly from GitHub:
 # If you do not have devtools installed:
 # install.packages("devtools")
 
-devtools::install_github("tamara-vaz/HOME")
+devtools::install_github("tamaravaz/HOME")
 ```
 
 ## Quick Start: Estimating Mortality
