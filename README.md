@@ -28,9 +28,9 @@ devtools::install_github("tamaravaz/HOME")
 ```r
 # Input data: Respondent age, Proportion of mothers alive (Sn), Mean age of childbearing (Mn)
 df_input <- data.frame(
-  age_n = c(20, 25, 30, 35, 40, 45, 50, 55, 60),
-  Sn = c(0.9916,0.9814,0.9663,0.9414,0.9009,0.7884,0.6333,0.3856,0.1248),
-  Mn = rep(25.5,9)
+  age_n = seq(15,60,5),
+  Sn = c(0.95772787,0.94418605,0.89402174,0.84395199,0.77974435,0.67717391,0.49225268,0.33670034,0.20071685,0.09517426),
+  Mn = rep(24,10)
 )
 # Run the estimation using the Luy (2012) method
 # This creates an 'OrphanhoodEstimate' object containing metadata and inputs
