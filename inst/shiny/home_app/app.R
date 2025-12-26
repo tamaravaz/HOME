@@ -171,7 +171,7 @@ server <- function(input, output, session) {
   # --- Template ---
   output$download_template <- downloadHandler(
     filename = function() { "input_template.xlsx" },
-    content = function(file) { writexl::write_xlsx(data.frame(Age=seq(15,50,5), Sn=c(0.98,0.97,0.95,0.92,0.88,0.82,0.74,0.64), Mn=rep(26.5,8)), file) }
+    content = function(file) { writexl::write_xlsx(data.frame(Age=seq(20,60,5), Sn=c(0.9916,0.9814,0.9663,0.9414,0.9009,0.7884,0.6333,0.3856,0.1248), Mn=rep(25.5,9)), file) }
   )
 
   # --- Read Data ---
