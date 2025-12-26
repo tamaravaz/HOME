@@ -1,16 +1,28 @@
 Package: HOME
-Type: Package
-Title: What the Package Does (Title Case)
+Title: Harmonized Orphanhood Mortality Estimation
 Version: 0.1.0
-Authors@R: c(
-    person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
-    )
-  )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Authors@R: 
+    person("Tamara", "Vaz", , "tamaravaz.m@gmail.com", role = c("aut", "cre"))
+Description: Implements indirect demographic methods for estimating adult mortality from
+    orphanhood data. The package includes the standard Brass (1973) method, the
+    regression-based approach developed by Timaeus (1991), and the adjustments
+    proposed by Luy (2012) for low-mortality populations
+    <doi:10.1007/s13524-012-0101-7>.
+    A relational model is used to harmonize estimates into comparable adult
+    mortality indicators. The package also provides diagnostic tools to assess
+    the sensitivity of results to assumptions about the mean age of childbearing
+    and the choice of model life table family.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: 
+    R (>= 3.5.0)
+Imports:
+    ggplot2,
+    stats,
+    utils
+Suggests:
+    gridExtra,
+    testthat,
+    shiny

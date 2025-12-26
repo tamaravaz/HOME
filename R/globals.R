@@ -1,0 +1,9 @@
+utils::globalVariables(
+  c(
+    "coef_brass_hill",
+    "coef_luy",
+    "coef_timaeus",
+    "coef_z_brass",
+    "mlt_un_data"
+  )
+)
