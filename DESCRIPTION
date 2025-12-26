@@ -26,3 +26,5 @@ Suggests:
     gridExtra,
     testthat,
     shiny
+URL: https://github.com/tamaravaz/HOME
+BugReports: https://github.com/tamaravaz/HOME/issues
