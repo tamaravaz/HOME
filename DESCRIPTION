@@ -19,12 +19,16 @@ RoxygenNote: 7.3.3
 Depends: 
     R (>= 3.5.0)
 Imports:
+    shiny,
     ggplot2,
-    stats,
-    utils
 Suggests:
     gridExtra,
     testthat,
-    shiny
+    DT,
+    readxl,
+    writexl,
+    plotly,
+    scales,
+    bslib
 URL: https://github.com/tamaravaz/HOME
 BugReports: https://github.com/tamaravaz/HOME/issues
