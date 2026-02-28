@@ -29,8 +29,6 @@ NULL
 #' @param num_respondents Numeric. Optional. Number of respondents per age group.
 #' @param sn_10 Numeric. Required for Brass if data do not start at ages 10--14.
 #' @param model_family Character. Model life table family. Default is \code{"General"}.
-#' @param std_level Numeric. Life expectancy at birth (\eqn{e_0}) of the standard
-#'        model life table. Default is 80.
 #'
 #' @return An object of class \code{OrphanhoodEstimate}.
 #' @export
@@ -42,8 +40,8 @@ om_estimate_index <- function(method = c("luy", "timaeus", "brass"),
                               surv_date,
                               num_respondents = NULL,
                               sn_10 = NULL,
-                              model_family = "General",
-                              std_level = 80) {
+                              model_family = "General"
+                              ) {
 
   method <- match.arg(method)
   sex_parent <- match.arg(sex_parent)
@@ -51,10 +49,6 @@ om_estimate_index <- function(method = c("luy", "timaeus", "brass"),
   # Validate Inputs
   if (!is.null(num_respondents) && length(num_respondents) != length(age_respondent)) {
     stop("Length of 'num_respondents' must match 'age_respondent'.")
-  }
-
-  if (!is.numeric(std_level) || length(std_level) != 1) {
-    stop("'std_level' must be a single numeric value.")
   }
 
   # 1. Dispatch Method
@@ -84,15 +78,15 @@ om_estimate_index <- function(method = c("luy", "timaeus", "brass"),
   else if (model_family %in% fam_cd) { selected_type <- "CD" }
   else { stop("Invalid 'model_family'.") }
 
-  # Filter Standard (UPDATED to use std_level)
+  # Filter Standard
   std <- std_data[std_data$Sex == sex_parent &
                     std_data$Family == model_family &
                     std_data$Type_MLT == selected_type &
-                    std_data$E0 == std_level, ]
+                    std_data$E0 == 60, ]
 
   if (nrow(std) == 0) {
-    stop(sprintf("Standard table not found for Family='%s', Sex='%s', E0=%s.",
-                 model_family, sex_parent, std_level))
+    stop(sprintf("Standard table not found for Family='%s', Sex='%s'",
+                 model_family, sex_parent))
   }
 
   # Logit Helpers
@@ -194,7 +188,7 @@ om_estimate_index <- function(method = c("luy", "timaeus", "brass"),
 
   last_valid_date <- Inf
   violation_count <- 0
-  margin_error <- 0.5
+  margin_error <- 0.01
 
   for (k in seq_len(nrow(raw))) {
     curr <- raw$ref_date[k]
@@ -251,8 +245,8 @@ om_estimate_index <- function(method = c("luy", "timaeus", "brass"),
       family = model_family,
       type = selected_type,
       method_id = method,
-      index_name = primary_index_name,
-      std_level = std_level # Saved in Meta
+      index_name = primary_index_name
+      # Saved in Meta
     ),
     inputs = list(
       method = method,
@@ -263,8 +257,8 @@ om_estimate_index <- function(method = c("luy", "timaeus", "brass"),
       surv_date = surv_date,
       num_respondents = num_respondents,
       sn_10 = sn_10,
-      model_family = model_family,
-      std_level = std_level # Saved in Inputs
+      model_family = model_family
+      # Saved in Inputs
     )
   )
 
@@ -278,8 +272,7 @@ om_estimate_index <- function(method = c("luy", "timaeus", "brass"),
 print.OrphanhoodEstimate <- function(x, ...) {
   cat("\n=== Orphanhood Mortality Estimates ===\n")
   cat(sprintf("Method:    %s\n", x$estimates$Method[1]))
-  cat(sprintf("Target:    %s Parent (%s - %s)\n", x$meta$sex, x$meta$type, x$meta$family))
-  cat(sprintf("Standard:  e0 = %s\n", x$meta$std_level)) # Show in print
+  cat(sprintf("Target:    %s Parent (%s - %s)\n", x$meta$sex, x$meta$type, x$meta$family)) # Show in print
 
   age_lbl <- if(x$meta$method_id == "timaeus") "Upper Bound (n)" else "Lower Bound (n)"
   cat(sprintf("Age Ref:   %s\n", age_lbl))
