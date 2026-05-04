@@ -60,13 +60,38 @@ library(writexl)
   "45q15" = "<sub>45</sub>q<sub>15</sub>"
 )
 
-# Default template values for the downloadable data template
+# Example dataset: maternal orphanhood data from the Italian Multipurpose Survey
+# (Indagine Multiscopo sulle Famiglie), June 1998.
+#
+# Source: Luy, M. (2012). Estimating mortality differences in developed countries
+#   from survey information on maternal and paternal orphanhood.
+#   Demography, 49(2), 607-627. https://doi.org/10.1007/s13524-012-0101-4
+#   Table 1 (maternal orphanhood, total population).
+#
+# Proportions alive (sn) computed as: mothers_alive / (mothers_alive + mothers_dead).
+# Mean age at childbearing (mn) taken directly from survey-reported A.C.B. values.
+# Column n:  lower bound of five-year respondent age group (e.g., 20 = age group 20-24).
+# Column sn: proportion of respondents with mother reported alive.
+# Column mn: mean age of mothers at respondent's birth (M_n), years.
 .TEMPLATE <- data.frame(
-  n  = seq(15L, 60L, by = 5L),
-  sn = c(0.98, 0.97, 0.95, 0.92, 0.88, 0.82, 0.75, 0.65, 0.55, 0.40),
-  mn = rep(27, 10L),
+  n  = c(20L, 25L, 30L, 35L, 40L, 45L, 50L, 55L, 60L),
+  sn = c(
+    3694  / (3694  +   47),   # age group 20-24
+    3966  / (3966  +  136),   # age group 25-29
+    4152  / (4152  +  295),   # age group 30-34
+    3902  / (3902  +  485),   # age group 35-39
+    3327  / (3327  +  754),   # age group 40-44
+    2663  / (2663  + 1221),   # age group 45-49
+    1895  / (1895  + 1736),   # age group 50-54
+    1233  / (1233  + 2282),   # age group 55-59
+    670  / ( 670  + 2502)    # age group 60-64
+  ),
+  mn = c(27.27, 28.06, 28.45, 28.64, 28.19, 27.59, 27.19, 26.17, 25.01),
   stringsAsFactors = FALSE
 )
+
+# Survey date: June 1998 (decimal year = 1998 + 6/12)
+.EXAMPLE_SURVEY_DATE <- 1998.5
 
 # ------------------------------------------------------------------------------
 # 2. Helper Functions
@@ -282,7 +307,7 @@ ui <- bslib::page_sidebar(
     shiny::numericInput(
       inputId = "survey_date",
       label   = "Survey Date (decimal year)",
-      value   = 2024.75,
+      value   = .EXAMPLE_SURVEY_DATE,
       min     = 1950,
       max     = 2100,
       step    = 0.01
@@ -306,8 +331,21 @@ ui <- bslib::page_sidebar(
 
     shiny::downloadButton(
       outputId = "download_template",
-      label    = "Download Data Template",
+      label    = "Download Example Data",
       class    = "btn-link btn-sm w-100 mt-1"
+    ),
+
+    shiny::hr(),
+
+    shiny::tags$small(
+      class = "text-muted d-block",
+      style = "font-size: 0.75rem; line-height: 1.4;",
+      shiny::tags$strong("Example data:"),
+      " Italian Multipurpose Survey, June 1998.",
+      shiny::tags$br(),
+      "Source: Luy (2012),",
+      shiny::tags$em("Demography"),
+      "49(2), 607–627."
     )
   ),
 
@@ -459,6 +497,82 @@ ui <- bslib::page_sidebar(
         )
       )
     )
+    ,
+
+    # --- Tab 3: Method Comparison ---
+    bslib::nav_panel(
+      title = "Method Comparison",
+
+      # Two-column layout: controls left, plot right
+      bslib::layout_columns(
+        col_widths = c(3, 9),
+
+        # Left column: vertical controls panel
+        bslib::card(
+          bslib::card_body(
+            class = "py-3 px-3",
+
+            shiny::radioButtons(
+              inputId  = "comp_metric",
+              label    = "Mortality indicator",
+              choices  = c(
+                "₃₀q₃₀ (Prob. dying 30–60)" = "30q30",
+                "₄₅q₁₅ (Prob. dying 15–60)" = "45q15",
+                "e₃₀ (Life expectancy at 30)"              = "e30"
+              ),
+              selected = "30q30",
+              inline   = FALSE
+            ),
+
+            shiny::tags$hr(style = "margin: 8px 0;"),
+
+            shiny::selectInput(
+              inputId  = "comp_family",
+              label    = "Model life table family",
+              choices  = .FAMILIES,
+              selected = "General"
+            ),
+
+            shiny::tags$hr(style = "margin: 8px 0;"),
+
+            # Method notes — inline, no card, no scroll
+            shiny::uiOutput("ui_method_warnings"),
+
+            shiny::tags$hr(style = "margin: 8px 0;"),
+
+            # Action buttons at the bottom of the panel
+            shiny::tags$div(
+              style = "display:flex; gap:6px;",
+              shiny::actionButton(
+                inputId = "run_compare",
+                label   = "Compare",
+                class   = "btn-primary btn-sm"
+              ),
+              shiny::actionButton(
+                inputId = "show_comp_table",
+                label   = shiny::icon("table"),
+                title   = "View estimates table",
+                class   = "btn-outline-secondary btn-sm"
+              ),
+              shiny::downloadButton(
+                outputId = "download_comparison",
+                label    = "",
+                icon     = shiny::icon("download"),
+                title    = "Download estimates",
+                class    = "btn-outline-secondary btn-sm"
+              )
+            )
+          )
+        ),
+
+        # Right column: plot
+        bslib::card(
+          full_screen = TRUE,
+          bslib::card_header("Mortality Estimates by Method"),
+          plotly::plotlyOutput("plot_comparison", height = "520px")
+        )
+      )
+    )
   )
 )
 
@@ -471,7 +585,7 @@ server <- function(input, output, session) {
   # 4.1 Template download --------------------------------------------------
 
   output$download_template <- shiny::downloadHandler(
-    filename = function() "HOME_data_template.xlsx",
+    filename = function() "HOME_example_Luy2012.xlsx",
     content  = function(file) writexl::write_xlsx(.TEMPLATE, file)
   )
 
@@ -623,6 +737,175 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       writexl::write_xlsx(r_estimates()$estimates, file)
+    }
+  )
+
+  # 4.9 Method comparison ---------------------------------------------------
+
+  # Timaeus coefficients only cover respondent age groups up to 50 (n <= 50).
+  # Age groups 55+ are outside the range of the published weighting factors.
+  .TIMAEUS_MAX_AGE <- 45L
+
+  r_comparison <- shiny::eventReactive(input$run_compare, {
+    shiny::req(r_data())
+    df <- r_data()
+
+    run_method <- function(method) {
+      tryCatch(
+        HOME::om_estimate_index(
+          method          = method,
+          sex_parent      = input$sex,
+          age_respondent  = df$n,
+          p_surv          = df$sn,
+          mean_age_parent = df$mn,
+          surv_date       = input$survey_date,
+          model_family    = input$comp_family
+        )$estimates,
+        error = function(e) NULL
+      )
+    }
+
+    luy     <- run_method("luy")
+    timaeus <- run_method("timaeus")
+    brass   <- run_method("brass")
+
+    # Tag each result with its method label
+    if (!is.null(luy))     luy$MethodLabel     <- "Luy (2012)"
+    if (!is.null(timaeus)) timaeus$MethodLabel  <- "Timaeus (1992)"
+    if (!is.null(brass))   brass$MethodLabel    <- "Brass (1973)"
+
+    results <- do.call(rbind, Filter(Negate(is.null), list(luy, timaeus, brass)))
+    results
+  })
+
+
+  # Combined method limitation warnings (Timaeus + Brass) --------------------
+  # Method notes: compact inline text, no card, no scroll, no gaps
+  output$ui_method_warnings <- shiny::renderUI({
+    shiny::req(r_data())
+    df      <- r_data()
+    max_age <- max(df$n, na.rm = TRUE)
+    min_age <- min(df$n, na.rm = TRUE)
+    warns   <- list()
+
+    if (max_age > .TIMAEUS_MAX_AGE) {
+      warns[["timaeus"]] <- shiny::tags$p(
+        style = "color:#856404; font-size:0.78rem; margin:0 0 4px 0; line-height:1.3;",
+        shiny::tags$strong("⚠ Timaeus (1992):"),
+        " weights only published up to age group 50."
+      )
+    }
+
+    if (min_age > 10L) {
+      warns[["brass"]] <- shiny::tags$p(
+        style = "color:#856404; font-size:0.78rem; margin:0; line-height:1.3;",
+        shiny::tags$strong("⚠ Brass (1973):"),
+        sprintf(" sn_10 missing (data start at age %d); first estimate is NA.", min_age)
+      )
+    }
+
+    if (length(warns) > 0L) {
+      shiny::tags$div(
+        style = "background:#fffbea; border-left:3px solid #F5C400;
+                 padding:6px 8px; border-radius:3px;",
+        do.call(shiny::tagList, warns)
+      )
+    }
+  })
+
+  # Modal table on button click
+  shiny::observeEvent(input$show_comp_table, {
+    shiny::req(r_comparison())
+    metric <- input$comp_metric
+    tab    <- r_comparison()[, c("MethodLabel", "RespondentAge",
+                                 "RefTime", "Alpha", metric)]
+    names(tab) <- c("Method", "Age group", "Reference year", "Alpha", metric)
+
+    shiny::showModal(shiny::modalDialog(
+      title  = "Estimates by Method",
+      size   = "l",
+      footer = shiny::tagList(
+        shiny::downloadButton("download_comparison", "Download", class = "btn-sm"),
+        shiny::modalButton("Close")
+      ),
+      DT::renderDT(
+        DT::datatable(
+          tab,
+          rownames = FALSE,
+          options  = list(pageLength = 15L, dom = "tp", scrollX = TRUE,
+                          order = list(list(0L, "asc"), list(2L, "desc")))
+        ) |>
+          DT::formatRound(columns = c("Reference year", "Alpha", metric),
+                          digits   = 3L)
+      )
+    ))
+  })
+
+  # Render table for modal (also used by download)
+  output$table_comparison <- DT::renderDT({
+    shiny::req(r_comparison())
+    metric <- input$comp_metric
+    tab    <- r_comparison()[, c("MethodLabel", "RespondentAge",
+                                 "RefTime", "Alpha", metric)]
+    names(tab) <- c("Method", "Age group", "Reference year", "Alpha", metric)
+    DT::datatable(
+      tab,
+      rownames = FALSE,
+      options  = list(pageLength = 15L, dom = "tp", scrollX = TRUE,
+                      order = list(list(0L, "asc"), list(2L, "desc")))
+    ) |>
+      DT::formatRound(columns = c("Reference year", "Alpha", metric), digits = 3L)
+  })
+
+  # Comparison plot
+  output$plot_comparison <- plotly::renderPlotly({
+    shiny::req(r_comparison())
+
+    df_comp <- r_comparison()
+    metric  <- input$comp_metric
+    df_comp <- df_comp[!is.na(df_comp$RefTime) & !is.na(df_comp[[metric]]), ]
+
+    pal <- c(
+      "Luy (2012)"     = "#003082",
+      "Timaeus (1992)" = "#5A8FC2",
+      "Brass (1973)"   = "#F5C400"
+    )
+
+    p <- ggplot2::ggplot(
+      df_comp,
+      ggplot2::aes(
+        x      = RefTime,
+        y      = .data[[metric]],
+        colour = MethodLabel,
+        group  = MethodLabel,
+        text   = paste0(
+          "Method: ", MethodLabel, "<br>",
+          "Year: ",   round(RefTime, 2), "<br>",
+          metric, ": ", round(.data[[metric]], 4)
+        )
+      )
+    ) +
+      ggplot2::geom_line(linewidth = 0.9) +
+      ggplot2::geom_point(size = 2.5) +
+      ggplot2::scale_colour_manual(values = pal) +
+      ggplot2::labs(x = "Reference time (year)", y = "", colour = "Method") +
+      ggplot2::theme_minimal(base_size = 13) +
+      ggplot2::theme(legend.position = "bottom")
+
+    plotly::ggplotly(p, tooltip = "text") |>
+      plotly::layout(
+        yaxis  = list(title = .AXIS_LABELS[[metric]]),
+        legend = list(orientation = "h", x = 0, y = -0.2)
+      )
+  })
+
+  # Comparison export
+  output$download_comparison <- shiny::downloadHandler(
+    filename = function() {
+      paste0("HOME_comparison_", format(Sys.Date(), "%Y%m%d"), ".xlsx")
+    },
+    content = function(file) {
+      writexl::write_xlsx(r_comparison(), file)
     }
   )
 }
