@@ -2,17 +2,26 @@
 % Please edit documentation in R/om_diagnostics.R
 \name{plot.OrphanhoodSensitivity}
 \alias{plot.OrphanhoodSensitivity}
-\title{Plot Sensitivity to Mean Age of Childbearing}
+\title{Plot Method for \code{OrphanhoodSensitivity} Objects}
 \usage{
-\method{plot}{OrphanhoodSensitivity}(x, index = "e30", ...)
+\method{plot}{OrphanhoodSensitivity}(x, index = "30q30", ...)
 }
 \arguments{
 \item{x}{An object of class \code{OrphanhoodSensitivity}.}
 
-\item{index}{Character. Mortality index to plot ("e30", "45q15", or "30q30").}
+\item{index}{Character. Mortality index to plot. One of \code{"30q30"},
+\code{"45q15"}, or \code{"e30"}. Default: \code{"30q30"}.}
 
-\item{...}{Unused.}
+\item{...}{Further arguments (currently unused).}
+}
+\value{
+A \code{ggplot} object.
 }
 \description{
-Plot Sensitivity to Mean Age of Childbearing
+Displays estimated mortality indices across reference dates for each
+mean-age-of-childbearing offset, coloured from light (low offset) to
+dark (high offset).
+}
+\seealso{
+\code{\link{om_sensitivity}}
 }

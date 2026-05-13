@@ -2,11 +2,11 @@
 % Please edit documentation in R/om_diagnostics.R
 \name{om_dashboard}
 \alias{om_dashboard}
-\title{Create a Diagnostic Dashboard}
+\title{Combined Diagnostic Dashboard}
 \usage{
 om_dashboard(
   object,
-  index = "e30",
+  index = "30q30",
   family_type = "UN",
   range_m = seq(-1.5, 1.5, 0.5)
 )
@@ -14,12 +14,44 @@ om_dashboard(
 \arguments{
 \item{object}{An object of class \code{OrphanhoodEstimate}.}
 
-\item{index}{Character. Mortality index to display.}
+\item{index}{Character. Mortality index to display in sensitivity panels.
+One of \code{"30q30"}, \code{"45q15"}, or \code{"e30"}.
+Default: \code{"30q30"}.}
 
-\item{family_type}{Character. "UN", "CD", or "All".}
+\item{family_type}{Character. Life table family system for the family
+sensitivity panel. One of \code{"UN"}, \code{"CD"}, or \code{"All"}.
+Default: \code{"UN"}.}
 
-\item{range_m}{Numeric vector. Range for sensitivity to M.}
+\item{range_m}{Numeric vector. Offsets applied to the mean age of
+childbearing. Default: \code{seq(-1.5, 1.5, 0.5)}.}
+}
+\value{
+If \pkg{gridExtra} is available, arranges and displays the three
+plots and returns the \code{gtable} object invisibly. Otherwise returns a
+named list with elements \code{Linearity}, \code{Sensitivity_M}, and
+\code{Sensitivity_Family}.
 }
 \description{
-Produces a combined panel of diagnostic plots for orphanhood estimates.
+Produces a three-panel diagnostic display combining the internal consistency
+check with sensitivity analyses for mean age of childbearing and model life
+table family. Requires the \pkg{gridExtra} package.
+}
+\examples{
+\dontrun{
+  result <- om_estimate_index(
+    method          = "luy",
+    sex_parent      = "Female",
+    age_respondent  = seq(20, 60, by = 5),
+    p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
+                        0.835, 0.769, 0.669, 0.565),
+    mean_age_parent = rep(27, 9),
+    surv_date       = 1998.5
+  )
+  om_dashboard(result, index = "30q30", family_type = "UN")
+}
+
+}
+\seealso{
+\code{\link{om_plot_linearity}}, \code{\link{om_sensitivity}},
+\code{\link{om_sensitivity_family}}
 }

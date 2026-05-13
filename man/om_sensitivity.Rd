@@ -2,23 +2,53 @@
 % Please edit documentation in R/om_diagnostics.R
 \name{om_sensitivity}
 \alias{om_sensitivity}
-\title{Run Sensitivity Diagnostics on Orphanhood Estimates}
+\title{Sensitivity Analysis: Mean Age of Childbearing}
 \usage{
 om_sensitivity(object = NULL, range_m = seq(-1.5, 1.5, 0.5), ...)
 }
 \arguments{
-\item{object}{Optional. An object of class \code{OrphanhoodEstimate}.}
+\item{object}{Optional. An object of class \code{OrphanhoodEstimate}.
+When supplied, all estimation arguments are taken from \code{object$inputs}
+and may be overridden via \code{...}.}
 
-\item{range_m}{Numeric vector. Offsets applied to M
-(default: \code{seq(-1.5, 1.5, 0.5)}).}
+\item{range_m}{Numeric vector of offsets (in years) applied to the baseline
+mean age of childbearing. Default: \code{seq(-1.5, 1.5, 0.5)}.}
 
-\item{...}{Additional arguments passed to \code{om_estimate_index}.}
+\item{...}{Additional arguments passed to \code{\link{om_estimate_index}},
+overriding values stored in \code{object}.}
 }
 \value{
-An object of class \code{OrphanhoodSensitivity}.
+An object of class \code{OrphanhoodSensitivity}, which is a named
+list with components:
+\describe{
+\item{\code{data}}{A data frame of estimates for each offset value,
+with an additional column \code{Offset_M} identifying the offset.}
+\item{\code{meta}}{A list of metadata: variable name, offset range,
+standard level, and estimation method.}
+}
 }
 \description{
-Performs a sensitivity analysis by varying the Mean Age of Childbearing (M)
-while holding all other assumptions constant, including the level of the
-standard life table.
+Evaluates the sensitivity of orphanhood-based mortality estimates to
+assumptions about the mean age of childbearing (\eqn{M_n}) by
+re-estimating indices across a grid of additive offsets.
+}
+\examples{
+\dontrun{
+  result <- om_estimate_index(
+    method          = "luy",
+    sex_parent      = "Female",
+    age_respondent  = seq(20, 60, by = 5),
+    p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
+                        0.835, 0.769, 0.669, 0.565),
+    mean_age_parent = rep(27, 9),
+    surv_date       = 1998.5
+  )
+  sens <- om_sensitivity(result, range_m = seq(-2, 2, by = 0.5))
+  plot(sens, index = "30q30")
+}
+
+}
+\seealso{
+\code{\link{plot.OrphanhoodSensitivity}},
+\code{\link{om_sensitivity_family}}, \code{\link{om_estimate_index}}
 }

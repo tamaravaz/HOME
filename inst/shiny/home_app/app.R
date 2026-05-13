@@ -60,38 +60,39 @@ library(writexl)
   "45q15" = "<sub>45</sub>q<sub>15</sub>"
 )
 
-# Example dataset: maternal orphanhood data from the Italian Multipurpose Survey
-# (Indagine Multiscopo sulle Famiglie), June 1998.
+# Example dataset: maternal orphanhood data for Roma population in 13 European
+# countries (Austria, Bulgaria, Croatia, Czechia, France, Greece, Hungary,
+# Italy, Portugal, Romania, Slovakia, Slovenia, Spain), collected 2024.
 #
-# Source: Luy, M. (2012). Estimating mortality differences in developed countries
-#   from survey information on maternal and paternal orphanhood.
-#   Demography, 49(2), 607-627. https://doi.org/10.1007/s13524-012-0101-4
-#   Table 1 (maternal orphanhood, total population).
+# Source: European Union Agency for Fundamental Rights (2025).
+#   Rights of Roma and Travellers in 13 European Countries: Perspectives from
+#   the Roma Survey 2024. Publications Office of the EU.
+#   https://doi.org/10.2811/5671307
 #
-# Proportions alive (sn) computed as: mothers_alive / (mothers_alive + mothers_dead).
-# Mean age at childbearing (mn) taken directly from survey-reported A.C.B. values.
-# Column n:  lower bound of five-year respondent age group (e.g., 20 = age group 20-24).
+# Column n:  lower bound of five-year respondent age group (e.g., 15 = age 15-19).
 # Column sn: proportion of respondents with mother reported alive.
 # Column mn: mean age of mothers at respondent's birth (M_n), years.
 .TEMPLATE <- data.frame(
-  n  = c(20L, 25L, 30L, 35L, 40L, 45L, 50L, 55L, 60L),
+  n  = c(15L, 20L, 25L, 30L, 35L, 40L, 45L, 50L, 55L, 60L),
   sn = c(
-    3694  / (3694  +   47),   # age group 20-24
-    3966  / (3966  +  136),   # age group 25-29
-    4152  / (4152  +  295),   # age group 30-34
-    3902  / (3902  +  485),   # age group 35-39
-    3327  / (3327  +  754),   # age group 40-44
-    2663  / (2663  + 1221),   # age group 45-49
-    1895  / (1895  + 1736),   # age group 50-54
-    1233  / (1233  + 2282),   # age group 55-59
-    670  / ( 670  + 2502)    # age group 60-64
+    0.95772787,  # age group 15-19
+    0.94418605,  # age group 20-24
+    0.89402174,  # age group 25-29
+    0.84395199,  # age group 30-34
+    0.77974435,  # age group 35-39
+    0.67717391,  # age group 40-44
+    0.49225268,  # age group 45-49
+    0.33670034,  # age group 50-54
+    0.20071685,  # age group 55-59
+    0.09517426   # age group 60-64
   ),
-  mn = c(27.27, 28.06, 28.45, 28.64, 28.19, 27.59, 27.19, 26.17, 25.01),
+  mn = c(24.52141, 24.20389, 23.69681, 23.48293, 23.26149,
+         23.43733, 22.00104, 23.37398, 21.069,   19.92958),
   stringsAsFactors = FALSE
 )
 
-# Survey date: June 1998 (decimal year = 1998 + 6/12)
-.EXAMPLE_SURVEY_DATE <- 1998.5
+# Survey date: Roma Survey 2024 (decimal year ~2024 + 9.88/12 = Oct 2024)
+.EXAMPLE_SURVEY_DATE <- 2024.752792
 
 # ------------------------------------------------------------------------------
 # 2. Helper Functions
@@ -341,11 +342,13 @@ ui <- bslib::page_sidebar(
       class = "text-muted d-block",
       style = "font-size: 0.75rem; line-height: 1.4;",
       shiny::tags$strong("Example data:"),
-      " Italian Multipurpose Survey, June 1998.",
+      " Roma Survey 2024 (13 European countries).",
       shiny::tags$br(),
-      "Source: Luy (2012),",
-      shiny::tags$em("Demography"),
-      "49(2), 607–627."
+      "Source: EU Agency for Fundamental Rights (2025),",
+      shiny::tags$em("Rights of Roma and Travellers."),
+      shiny::tags$a("doi:10.2811/9919091",
+                    href = "https://data.europa.eu/doi/10.2811/9919091",
+                    target = "_blank", style = "font-size:0.75rem;")
     )
   ),
 
@@ -585,7 +588,7 @@ server <- function(input, output, session) {
   # 4.1 Template download --------------------------------------------------
 
   output$download_template <- shiny::downloadHandler(
-    filename = function() "HOME_example_Luy2012.xlsx",
+    filename = function() "HOME_example_RomaSurvey2024.xlsx",
     content  = function(file) writexl::write_xlsx(.TEMPLATE, file)
   )
 
@@ -742,8 +745,8 @@ server <- function(input, output, session) {
 
   # 4.9 Method comparison ---------------------------------------------------
 
-  # Timaeus coefficients only cover respondent age groups up to 50 (n <= 50).
-  # Age groups 55+ are outside the range of the published weighting factors.
+  # Timaeus coefficients only cover respondent age groups up to 45 (n <= 45).
+  # Age groups 50+ are outside the range of the published weighting factors.
   .TIMAEUS_MAX_AGE <- 45L
 
   r_comparison <- shiny::eventReactive(input$run_compare, {
@@ -792,15 +795,7 @@ server <- function(input, output, session) {
       warns[["timaeus"]] <- shiny::tags$p(
         style = "color:#856404; font-size:0.78rem; margin:0 0 4px 0; line-height:1.3;",
         shiny::tags$strong("⚠ Timaeus (1992):"),
-        " weights only published up to age group 50."
-      )
-    }
-
-    if (min_age > 10L) {
-      warns[["brass"]] <- shiny::tags$p(
-        style = "color:#856404; font-size:0.78rem; margin:0; line-height:1.3;",
-        shiny::tags$strong("⚠ Brass (1973):"),
-        sprintf(" sn_10 missing (data start at age %d); first estimate is NA.", min_age)
+        " weights only published up to age group 45."
       )
     }
 

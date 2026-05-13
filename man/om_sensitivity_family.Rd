@@ -2,7 +2,7 @@
 % Please edit documentation in R/om_diagnostics.R
 \name{om_sensitivity_family}
 \alias{om_sensitivity_family}
-\title{Run Sensitivity Analysis on Model Life Table Families}
+\title{Sensitivity Analysis: Model Life Table Family}
 \usage{
 om_sensitivity_family(
   object = NULL,
@@ -14,16 +14,47 @@ om_sensitivity_family(
 \arguments{
 \item{object}{Optional. An object of class \code{OrphanhoodEstimate}.}
 
-\item{type}{Character. One of \code{"UN"}, \code{"CD"}, or \code{"All"}.}
+\item{type}{Character. Family system to evaluate. One of \code{"UN"},
+\code{"CD"}, or \code{"All"} (default). Ignored when \code{families}
+is supplied.}
 
-\item{families}{Optional character vector of families to test.}
+\item{families}{Optional character vector of specific family names to test,
+overriding \code{type}.}
 
-\item{...}{Additional arguments passed to \code{om_estimate_index}.}
+\item{...}{Additional arguments passed to \code{\link{om_estimate_index}}.}
 }
 \value{
-An object of class \code{OrphanhoodSensitivityFamily}.
+An object of class \code{OrphanhoodSensitivityFamily}, which is a
+named list with components:
+\describe{
+\item{\code{data}}{A data frame of estimates for each family, with an
+additional column \code{Family} identifying the model life table.}
+\item{\code{meta}}{A list of metadata: variable name, families tested,
+standard level, system name, and estimation method.}
+}
 }
 \description{
-Evaluates the sensitivity of orphanhood-based estimates to the assumed
-age pattern of mortality by varying the Model Life Table family.
+Evaluates the sensitivity of orphanhood-based mortality estimates to the
+assumed age pattern of mortality by re-estimating indices across multiple
+model life table families.
+}
+\examples{
+\dontrun{
+  result <- om_estimate_index(
+    method          = "luy",
+    sex_parent      = "Female",
+    age_respondent  = seq(20, 60, by = 5),
+    p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
+                        0.835, 0.769, 0.669, 0.565),
+    mean_age_parent = rep(27, 9),
+    surv_date       = 1998.5
+  )
+  sens_fam <- om_sensitivity_family(result, type = "UN")
+  plot(sens_fam, index = "30q30")
+}
+
+}
+\seealso{
+\code{\link{plot.OrphanhoodSensitivityFamily}},
+\code{\link{om_sensitivity}}, \code{\link{om_estimate_index}}
 }

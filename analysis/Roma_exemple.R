@@ -51,47 +51,18 @@ library(sjPlot)
 library(HOME)
 
 # ==============================================================================
-# 2. PUBLICATION THEME
-# ==============================================================================
-
-theme_TVMS <- function(base_size = 11) {
-  theme_bw(base_size = base_size, base_family = "serif") +
-    theme(
-      plot.title = element_text(face = "bold", size = base_size + 1, hjust = 0),
-      axis.title = element_text(face = "bold"),
-      legend.position = "bottom",
-      legend.justification = "center",
-      panel.grid.major.y = element_line(color = "grey90", linewidth = 0.3),
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor = element_blank(),
-      strip.background = element_blank(),
-      strip.text = element_text(face = "bold"),
-      plot.tag = element_text(
-        family = "serif",
-        face = "bold",
-        size = 12)
-    )
-}
-
-set_theme(theme_TVMS())
-
-save_figure <- function(p, file, w, h) {
-  ggsave(paste0(file, ".svg"), p, width = w, height = h)
-}
-
-# ==============================================================================
-# 3. DATA LOADING AND PREPARATION
+# 2. DATA LOADING AND PREPARATION
 # ==============================================================================
 dt_ro <- data.table(
   age_n = c(15, 20, 25, 30, 35, 40, 45, 50, 55, 60),
-  Sn    = c(0.9405941,0.9295775,0.8961039,0.8488372,0.8163265,0.6139241,0.4745763,0.3282443,0.1134752,0.0560000),
-  Mn    = c(23.89999,23.46872,22.68191,23.34323,21.92746,22.04886,22.10148,21.56662,18.50000,22.28571)
+  Sn    =c(0.95772787,0.94418605,0.89402174,0.84395199,0.77974435,0.67717391,0.49225268,0.33670034,0.20071685,0.09517426),
+  Mn    = c(24.52141,24.20389,23.69681,23.48293,23.26149,23.43733,22.00104,23.37398,21.069	,19.92958)
 )
 
-survey_date <- 2021.347945
+survey_date <- 2024.752792
 
 # ==============================================================================
-# 4. ESTIMATION WRAPPER
+# 3. ESTIMATION WRAPPER
 # ==============================================================================
 
 estimate_method <- function(method, ages = dt_ro$age_n, Mn = dt_ro$Mn, Sn= dt_ro$Sn) {

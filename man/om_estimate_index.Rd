@@ -12,49 +12,83 @@ om_estimate_index(
   mean_age_parent,
   surv_date,
   num_respondents = NULL,
-  sn_10 = NULL,
-  model_family = "General",
-  std_level = 80
+  model_family = "General"
 )
 }
 \arguments{
-\item{method}{Character. One of \code{"luy"}, \code{"timaeus"}, or \code{"brass"}.}
+\item{method}{Character. Estimation method. One of \code{"luy"},
+\code{"timaeus"}, or \code{"brass"}.}
 
-\item{sex_parent}{Character. \code{"Female"} or \code{"Male"}.}
+\item{sex_parent}{Character. Sex of the parent. One of \code{"Female"} or
+\code{"Male"}.}
 
-\item{age_respondent}{Numeric. Lower bound of respondent age group.}
+\item{age_respondent}{Numeric vector. Lower bound of respondent age groups
+(e.g., \code{c(15, 20, 25, 30)}).}
 
-\item{p_surv}{Numeric. Proportion of parents alive.}
+\item{p_surv}{Numeric vector. Proportion of respondents reporting the parent
+alive, one value per age group.}
 
-\item{mean_age_parent}{Numeric. Mean age of parents at birth (\eqn{M_n}).}
+\item{mean_age_parent}{Numeric scalar or vector. Mean age of parents at
+respondent's birth (\eqn{M}). A scalar is recycled across all age groups.}
 
-\item{surv_date}{Numeric. Decimal survey year.}
+\item{surv_date}{Numeric. Survey reference date as a decimal year
+(e.g., \code{2015.5}).}
 
-\item{num_respondents}{Numeric. Optional. Number of respondents per age group.}
+\item{num_respondents}{Numeric vector. Optional. Number of respondents per
+age group. Reserved for future use; currently has no effect on estimates.}
 
-\item{sn_10}{Numeric. Required for Brass if data do not start at ages 10--14.}
-
-\item{model_family}{Character. Model life table family. Default is \code{"General"}.}
-
-\item{std_level}{Numeric. Life expectancy at birth (\eqn{e_0}) of the standard
-model life table. Default is 80.}
+\item{model_family}{Character. Model life table family used as the relational
+logit standard. UN families: \code{"General"}, \code{"Latin"},
+\code{"Chilean"}, \code{"South_Asian"}, \code{"Far_East_Asian"}.
+Coale-Demeny families: \code{"West"}, \code{"North"}, \code{"East"},
+\code{"South"}. Default is \code{"General"}.}
 }
 \value{
-An object of class \code{OrphanhoodEstimate}.
+An object of class \code{OrphanhoodEstimate}, a named list with:
+\describe{
+\item{\code{estimates}}{Data frame of estimated mortality indices by
+respondent age group.}
+\item{\code{meta}}{List of metadata: sex, model family, system type,
+method identifier, and primary index name.}
+\item{\code{inputs}}{List of original input arguments for
+reproducibility and sensitivity analysis.}
+}
 }
 \description{
 Estimates conditional survivorship probabilities using orphanhood methods
-and harmonizes them into common adult mortality indices using a one-parameter
-relational logit model.
+and harmonizes them into common adult mortality indices using a
+one-parameter relational logit model.
 }
 \details{
-The function implements three orphanhood-based estimation methods (Brass,
-Timæus, and Luy). Regardless of the method selected, estimates are harmonized
-into three comparable mortality indices:
-
+Three orphanhood-based estimation methods are supported. Regardless of the
+method selected, estimates are harmonized into three comparable mortality
+indices:
 \itemize{
-\item \strong{30q30}: Probability of dying between ages 30 and 60 (default index).
+\item \strong{30q30}: Probability of dying between ages 30 and 60.
 \item \strong{45q15}: Probability of dying between ages 15 and 60.
 \item \strong{e30}: Life expectancy at age 30.
 }
+
+For the Brass method, adjacent orphanhood proportions are paired across
+successive age groups. The first observation yields \code{NA} by
+construction because no preceding adjacent proportion exists.
+}
+\examples{
+\dontrun{
+result <- om_estimate_index(
+  method          = "brass",
+  sex_parent      = "Female",
+  age_respondent  = c(20, 25, 30, 35, 40, 45),
+  p_surv          = c(0.906, 0.840, 0.747, 0.631, 0.518, 0.400),
+  mean_age_parent = 28.8,
+  surv_date       = 1975.64,
+  model_family    = "General"
+)
+print(result)
+}
+
+}
+\seealso{
+\code{\link{om_sensitivity}}, \code{\link{om_sensitivity_family}},
+\code{\link{om_plot_linearity}}
 }

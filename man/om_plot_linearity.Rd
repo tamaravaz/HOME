@@ -10,8 +10,29 @@ om_plot_linearity(object)
 \item{object}{An object of class \code{OrphanhoodEstimate}.}
 }
 \value{
-A ggplot object.
+A \code{ggplot} object.
 }
 \description{
-Displays the estimated alpha parameter across respondent ages.
+Displays the estimated Brass logit \eqn{\alpha} parameter across respondent
+age groups. A roughly constant \eqn{\alpha} indicates internal consistency
+of the orphanhood-based estimates; a systematic trend suggests age-reporting
+errors, adoption effects, or structural changes in mortality.
+}
+\examples{
+\dontrun{
+  result <- om_estimate_index(
+    method          = "luy",
+    sex_parent      = "Female",
+    age_respondent  = seq(20, 60, by = 5),
+    p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
+                        0.835, 0.769, 0.669, 0.565),
+    mean_age_parent = rep(27, 9),
+    surv_date       = 1998.5
+  )
+  om_plot_linearity(result)
+}
+
+}
+\seealso{
+\code{\link{om_estimate_index}}, \code{\link{om_dashboard}}
 }

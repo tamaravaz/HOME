@@ -2,17 +2,25 @@
 % Please edit documentation in R/om_diagnostics.R
 \name{plot.OrphanhoodSensitivityFamily}
 \alias{plot.OrphanhoodSensitivityFamily}
-\title{Plot Model Life Table Family Sensitivity}
+\title{Plot Method for \code{OrphanhoodSensitivityFamily} Objects}
 \usage{
-\method{plot}{OrphanhoodSensitivityFamily}(x, index = "e30", ...)
+\method{plot}{OrphanhoodSensitivityFamily}(x, index = "30q30", ...)
 }
 \arguments{
 \item{x}{An object of class \code{OrphanhoodSensitivityFamily}.}
 
-\item{index}{Character. Mortality index to plot.}
+\item{index}{Character. Mortality index to plot. One of \code{"30q30"},
+\code{"45q15"}, or \code{"e30"}. Default: \code{"30q30"}.}
 
-\item{...}{Unused.}
+\item{...}{Further arguments (currently unused).}
+}
+\value{
+A \code{ggplot} object.
 }
 \description{
-Plot Model Life Table Family Sensitivity
+Displays estimated mortality indices across reference dates for each model
+life table family, distinguished by line type.
+}
+\seealso{
+\code{\link{om_sensitivity_family}}
 }
