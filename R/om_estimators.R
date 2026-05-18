@@ -40,12 +40,65 @@
 #'
 #' @return An object of class \code{OrphanhoodEstimate}, a named list with:
 #'   \describe{
-#'     \item{\code{estimates}}{Data frame of estimated mortality indices by
-#'       respondent age group.}
-#'     \item{\code{meta}}{List of metadata: sex, model family, system type,
-#'       method identifier, and primary index name.}
-#'     \item{\code{inputs}}{List of original input arguments for
-#'       reproducibility and sensitivity analysis.}
+#'     \item{\code{estimates}}{
+#'       Data frame of estimated adult mortality indices by respondent age
+#'       group. Columns:
+#'       \describe{
+#'         \item{\code{Method}}{
+#'           Citation label of the estimation method used.
+#'         }
+#'         \item{\code{RefYear}}{
+#'           Estimated reference year associated with the mortality estimate.
+#'         }
+#'         \item{\code{Age}}{
+#'           Respondent age group used to derive the orphanhood estimate.
+#'         }
+#'         \item{\code{b}}{
+#'           Initial exact age of the conditional survivorship interval.
+#'         }
+#'         \item{\code{n}}{
+#'           Width of the conditional survivorship interval in years.
+#'         }
+#'         \item{\code{n_b}}{
+#'           Terminal exact age of the survivorship interval,
+#'           corresponding to \eqn{b + n}.
+#'         }
+#'         \item{\code{l(b)}}{
+#'           Estimated survivorship at exact age \eqn{b}.
+#'         }
+#'         \item{\code{l(n_b)}}{
+#'           Estimated survivorship at exact age \eqn{b + n}.
+#'         }
+#'         \item{\code{npb}}{
+#'           Estimated conditional survivorship probability
+#'           \eqn{{}_np_b = l(b+n) / l(b)}, representing survival from
+#'           exact age \eqn{b} to exact age \eqn{b + n}.
+#'         }
+#'         \item{\code{Alpha}}{
+#'           Relational logit level parameter \eqn{\alpha} shifting the
+#'           standard life table.
+#'         }
+#'         \item{\code{30q30}}{
+#'           Probability of dying between exact ages 30 and 60.
+#'         }
+#'         \item{\code{45q15}}{
+#'           Probability of dying between exact ages 15 and 60.
+#'         }
+#'         \item{\code{e30}}{
+#'           Life expectancy at exact age 30.
+#'         }
+#'       }
+#'     }
+#'     \item{\code{meta}}{
+#'       Named list of metadata: sex of the parent, model life table family,
+#'       family system type (\code{"UN"} or \code{"CD"}), method identifier,
+#'       and primary index name.
+#'     }
+#'     \item{\code{inputs}}{
+#'       Named list of the original input arguments, retained for
+#'       reproducibility and use by \code{\link{om_sensitivity}} and
+#'       \code{\link{om_sensitivity_family}}.
+#'     }
 #'   }
 #'
 #' @seealso \code{\link{om_sensitivity}}, \code{\link{om_sensitivity_family}},
@@ -238,19 +291,20 @@ om_estimate_index <- function(method          = c("luy", "timaeus", "brass"),
   # --- 5. Assemble output data frame --------------------------------------
 
   output_df <- data.frame(
-    Method        = citation,
-    RespondentAge = raw$DisplayAge,
-    BaseAge       = raw$base_age,
-    NumeratorAge  = raw$target_age,
-    lx_base       = raw$lx_base,
-    lx_n          = raw$lx_n,
-    CondProb      = raw$prob,
-    RefTime       = raw$ref_date,
-    Alpha         = raw$Alpha,
-    "30q30"       = raw$est_30q30,
-    "45q15"       = raw$est_45q15,
-    e30           = raw$est_e30,
-    check.names   = FALSE
+    Method   = citation,
+    RefYear  = raw$ref_date,
+    Age      = raw$DisplayAge,
+    n        = raw$target_age - raw$base_age,
+    b        = raw$base_age,
+    n_b      = raw$target_age,
+    "l(b)"   = raw$lx_base,
+    "l(n_b)" = raw$lx_n,
+    npb      = raw$prob,
+    Alpha    = raw$Alpha,
+    "30q30"  = raw$est_30q30,
+    "45q15"  = raw$est_45q15,
+    e30      = raw$est_e30,
+    check.names = FALSE
   )
 
   # --- 6. Construct and return S3 object ----------------------------------
@@ -303,11 +357,11 @@ print.OrphanhoodEstimate <- function(x, ...) {
   print_df        <- x$estimates
   print_df$Method <- NULL
 
-  for (col in c("lx_base", "lx_n", "CondProb")) {
+  for (col in c("l(b)", "l(n_b)", "npb")) {
     if (col %in% names(print_df))
       print_df[[col]] <- round(print_df[[col]], 4L)
   }
-  print_df$RefTime <- round(print_df$RefTime, 2L)
+  print_df$RefYear <- round(print_df$RefYear, 2L)
   print_df$Alpha   <- round(print_df$Alpha,   3L)
 
   for (col in c("30q30", "45q15")) {
@@ -543,17 +597,17 @@ summary.OrphanhoodEstimate <- function(object, ...) {
 
     if (sex == "Female") {
       base              <- 25L
-      target_n          <- 25L + curr_age   # l(25+n) / l(25), eq. B.4
+      target_n          <- 25L + curr_age
       coefs             <- all_coefs$Female
       z_arg             <- curr_mn + curr_age
       correction_factor <- 0
     } else {
       if (curr_mn < 36) {
         base  <- 32.5
-        coefs <- all_coefs$Male_A            # Table 87a: l(35+n) / l(32.5)
+        coefs <- all_coefs$Male_A
       } else {
         base  <- 37.5
-        coefs <- all_coefs$Male_B            # Table 87b: l(40+n) / l(37.5)
+        coefs <- all_coefs$Male_B
       }
       target_n          <- base + curr_age + 2.5
       z_arg             <- curr_mn + curr_age + 0.75

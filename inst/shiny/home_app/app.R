@@ -99,13 +99,6 @@ library(writexl)
 # ------------------------------------------------------------------------------
 
 #' Validate uploaded data frame
-#'
-#' Checks that required columns are present and that values are within
-#' plausible ranges for indirect mortality estimation.
-#'
-#' @param df A data frame read from the uploaded file.
-#' @return Invisibly returns \code{TRUE} on success; throws a shiny
-#'   \code{validate()} error otherwise.
 validate_input_data <- function(df) {
   shiny::validate(
     shiny::need(
@@ -129,12 +122,6 @@ validate_input_data <- function(df) {
 }
 
 #' Read uploaded file as data frame
-#'
-#' Supports \code{.csv} and \code{.xlsx} formats. Column names are
-#' coerced to lowercase for consistency.
-#'
-#' @param file_info The list returned by \code{shiny::fileInput()}.
-#' @return A data frame with lowercase column names.
 read_input_file <- function(file_info) {
   ext <- tools::file_ext(file_info$name)
   df  <- switch(ext,
@@ -149,12 +136,6 @@ read_input_file <- function(file_info) {
 # ------------------------------------------------------------------------------
 # 3. UI
 # ------------------------------------------------------------------------------
-
-# OeAW/VID institutional palette
-# Primary blue:  #003082  (OeAW navy)
-# Accent yellow: #F5C400  (VID gold)
-# Light surface: #F4F6FA
-# Muted text:    #5A6A85
 
 .THEME <- bslib::bs_theme(
   version       = 5,
@@ -179,162 +160,75 @@ ui <- bslib::page_sidebar(
   title = shiny::span(
     style = "color: #FFFFFF; font-weight: 600; letter-spacing: 0.02em;",
     "HOME",
-    shiny::span(
-      style = "color: #F5C400; margin: 0 6px;", "\u2014"
-    ),
-    shiny::span(
-      style = "font-weight: 300; color: #B8C8E8;",
-      "Indirect Adult Mortality Estimation"
-    )
+    shiny::span(style = "color: #F5C400; margin: 0 6px;", "\u2014"),
+    shiny::span(style = "font-weight: 300; color: #B8C8E8;",
+                "Indirect Adult Mortality Estimation")
   ),
 
-  tags$head(
-    tags$style(HTML("
-      /* ── Layout ── */
-      table.dataTable tbody td { padding: 4px 8px !important; font-size: 0.875rem; }
-      .btn-icon { padding: 2px 6px; font-size: 0.8rem; color: #5A6A85; border-color: #DDE3EE; }
-
-      /* ── Navbar / title bar ── */
-      .navbar { border-bottom: 3px solid #F5C400 !important; }
-
-      /* ── Sidebar ── */
-      .bslib-sidebar-layout > .sidebar {
-        border-right: 1px solid #DDE3EE !important;
-      }
-      .sidebar .sidebar-title {
-        color: #003082 !important;
-        font-weight: 600 !important;
-        font-size: 0.85rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        border-bottom: 2px solid #F5C400;
-        padding-bottom: 6px;
-        margin-bottom: 12px;
-      }
-
-      /* ── Cards ── */
-      .card { border-radius: 6px !important; box-shadow: 0 1px 4px rgba(0,48,130,0.07) !important; }
-      .card-header {
-        background-color: #F4F6FA !important;
-        border-bottom: 1px solid #DDE3EE !important;
-        color: #003082 !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-      }
-
-      /* ── Nav tabs (underline style) ── */
-      .nav-underline .nav-link.active {
-        color: #003082 !important;
-        border-bottom-color: #F5C400 !important;
-        border-bottom-width: 3px !important;
-        font-weight: 600 !important;
-      }
-      .nav-underline .nav-link {
-        color: #5A6A85 !important;
-      }
-      .nav-underline .nav-link:hover {
-        color: #003082 !important;
-        border-bottom-color: #DDE3EE !important;
-      }
-
-      /* ── Primary button ── */
-      .btn-primary {
-        background-color: #003082 !important;
-        border-color: #003082 !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.03em !important;
-      }
-      .btn-primary:hover {
-        background-color: #00216A !important;
-        border-color: #00216A !important;
-      }
-
-      /* ── Radio buttons & inputs ── */
-      .form-check-input:checked {
-        background-color: #003082 !important;
-        border-color: #003082 !important;
-      }
-      .form-label, .control-label, label {
-        color: #1A2340 !important;
-        font-weight: 600 !important;
-        font-size: 0.82rem !important;
-      }
-
-      /* ── Slider ── */
-      .irs--shiny .irs-bar { background: #003082 !important; border-color: #003082 !important; }
-      .irs--shiny .irs-handle { background: #003082 !important; border-color: #003082 !important; }
-      .irs--shiny .irs-from, .irs--shiny .irs-to, .irs--shiny .irs-single {
-        background: #003082 !important;
-      }
-
-      /* ── DT table header ── */
-      table.dataTable thead th {
-        background-color: #F4F6FA !important;
-        color: #003082 !important;
-        font-weight: 600 !important;
-        border-bottom: 2px solid #DDE3EE !important;
-      }
-
-      /* ── Download link ── */
-      .btn-link { color: #003082 !important; }
-      .btn-link:hover { color: #F5C400 !important; }
-    "))
-  ),
+  tags$head(tags$style(HTML("
+    table.dataTable tbody td { padding: 4px 8px !important; font-size: 0.875rem; }
+    .btn-icon { padding: 2px 6px; font-size: 0.8rem; color: #5A6A85; border-color: #DDE3EE; }
+    .navbar { border-bottom: 3px solid #F5C400 !important; }
+    .bslib-sidebar-layout > .sidebar { border-right: 1px solid #DDE3EE !important; }
+    .sidebar .sidebar-title {
+      color: #003082 !important; font-weight: 600 !important; font-size: 0.85rem !important;
+      text-transform: uppercase !important; letter-spacing: 0.08em !important;
+      border-bottom: 2px solid #F5C400; padding-bottom: 6px; margin-bottom: 12px;
+    }
+    .card { border-radius: 6px !important; box-shadow: 0 1px 4px rgba(0,48,130,0.07) !important; }
+    .card-header {
+      background-color: #F4F6FA !important; border-bottom: 1px solid #DDE3EE !important;
+      color: #003082 !important; font-weight: 600 !important; font-size: 0.9rem !important;
+    }
+    .nav-underline .nav-link.active {
+      color: #003082 !important; border-bottom-color: #F5C400 !important;
+      border-bottom-width: 3px !important; font-weight: 600 !important;
+    }
+    .nav-underline .nav-link { color: #5A6A85 !important; }
+    .nav-underline .nav-link:hover { color: #003082 !important; border-bottom-color: #DDE3EE !important; }
+    .btn-primary {
+      background-color: #003082 !important; border-color: #003082 !important;
+      font-weight: 600 !important; letter-spacing: 0.03em !important;
+    }
+    .btn-primary:hover { background-color: #00216A !important; border-color: #00216A !important; }
+    .form-check-input:checked { background-color: #003082 !important; border-color: #003082 !important; }
+    .form-label, .control-label, label {
+      color: #1A2340 !important; font-weight: 600 !important; font-size: 0.82rem !important;
+    }
+    .irs--shiny .irs-bar { background: #003082 !important; border-color: #003082 !important; }
+    .irs--shiny .irs-handle { background: #003082 !important; border-color: #003082 !important; }
+    .irs--shiny .irs-from, .irs--shiny .irs-to, .irs--shiny .irs-single { background: #003082 !important; }
+    table.dataTable thead th {
+      background-color: #F4F6FA !important; color: #003082 !important;
+      font-weight: 600 !important; border-bottom: 2px solid #DDE3EE !important;
+    }
+    .btn-link { color: #003082 !important; }
+    .btn-link:hover { color: #F5C400 !important; }
+  "))),
 
   # ------ Sidebar ------
   sidebar = bslib::sidebar(
     title = "Estimation Setup",
     width = 290,
 
-    shiny::fileInput(
-      inputId     = "file_upload",
-      label       = "Upload Survey Data",
-      accept      = c(".xlsx", ".csv"),
-      placeholder = "Requires columns: n, sn, mn"
-    ),
+    shiny::fileInput("file_upload", "Upload Survey Data",
+                     accept = c(".xlsx", ".csv"),
+                     placeholder = "Requires columns: n, sn, mn"),
 
-    shiny::selectInput(
-      inputId  = "method",
-      label    = "Estimation Method",
-      choices  = .METHODS
-    ),
+    shiny::selectInput("method", "Estimation Method", choices = .METHODS),
+    shiny::selectInput("sex",    "Parent Sex",        choices = c("Female", "Male")),
 
-    shiny::selectInput(
-      inputId  = "sex",
-      label    = "Parent Sex",
-      choices  = c("Female", "Male")
-    ),
+    shiny::numericInput("survey_date", "Survey Date (decimal year)",
+                        value = .EXAMPLE_SURVEY_DATE, min = 1950, max = 2100, step = 0.01),
 
-    shiny::numericInput(
-      inputId = "survey_date",
-      label   = "Survey Date (decimal year)",
-      value   = .EXAMPLE_SURVEY_DATE,
-      min     = 1950,
-      max     = 2100,
-      step    = 0.01
-    ),
-
-    shiny::selectInput(
-      inputId  = "family",
-      label    = "Model Life Table Family",
-      choices  = .FAMILIES
-    ),
+    shiny::selectInput("family", "Model Life Table Family", choices = .FAMILIES),
 
     shiny::hr(),
 
-    shiny::actionButton(
-      inputId = "run",
-      label   = "Compute Estimates",
-      class   = "btn-primary w-100"
-    ),
-
+    shiny::actionButton("run", "Compute Estimates", class = "btn-primary w-100"),
     shiny::br(),
-
-    shiny::downloadButton(
-      outputId = "download_template",
-      label    = "Download Example Data",
-      class    = "btn-link btn-sm w-100 mt-1"
-    ),
+    shiny::downloadButton("download_template", "Download Example Data",
+                          class = "btn-link btn-sm w-100 mt-1"),
 
     shiny::hr(),
 
@@ -355,41 +249,29 @@ ui <- bslib::page_sidebar(
   # ------ Main panel ------
   bslib::navset_card_underline(
 
-    # --- Tab 1: Main Estimates ---
+    # --- Tab 1: Estimates ---
     bslib::nav_panel(
       title = "Estimates",
-
       bslib::layout_columns(
         col_widths = c(8, 4),
 
-        # Trend plot card
         bslib::card(
           full_screen = TRUE,
           bslib::card_header(
             class = "d-flex justify-content-between align-items-center",
             "Temporal Trend",
-            shiny::selectInput(
-              inputId  = "plot_metric",
-              label    = NULL,
-              choices  = .METRICS,
-              width    = "280px"
-            )
+            shiny::selectInput("plot_metric", NULL, choices = .METRICS, width = "280px")
           ),
           shiny::uiOutput("ui_year_slider"),
           plotly::plotlyOutput("plot_main", height = "420px")
         ),
 
-        # Results table card
         bslib::card(
           bslib::card_header(
             class = "d-flex justify-content-between align-items-center",
             "Estimates Table",
-            shiny::downloadButton(
-              outputId = "download_results",
-              label    = NULL,
-              icon     = shiny::icon("download"),
-              class    = "btn-icon"
-            )
+            shiny::downloadButton("download_results", NULL,
+                                  icon = shiny::icon("download"), class = "btn-icon")
           ),
           DT::DTOutput("table_results")
         )
@@ -399,14 +281,8 @@ ui <- bslib::page_sidebar(
     # --- Tab 2: Diagnostics ---
     bslib::nav_panel(
       title = "Diagnostics",
-
-      # Sub-tabs: Internal Consistency | Sensitivity
-      # The mortality indicator selector appears only in the Sensitivity sub-tab,
-      # as om_plot_linearity() plots Alpha (mortality level) independently of
-      # any derived index (30q30, 45q15, e30).
       bslib::navset_card_underline(
 
-        # Sub-tab 1: Linearity test (no indicator selector needed)
         bslib::nav_panel(
           title = "Internal Consistency",
           bslib::card(
@@ -415,160 +291,92 @@ ui <- bslib::page_sidebar(
           )
         ),
 
-        # Sub-tab 2: Sensitivity analyses
         bslib::nav_panel(
           title = "Sensitivity",
-
-          # Mortality indicator selector — inline in this sub-tab only
           bslib::layout_columns(
             col_widths = c(12),
             bslib::card(
               bslib::card_body(
                 class = "py-2",
                 shiny::radioButtons(
-                  inputId  = "diag_metric",
-                  label    = "Mortality indicator",
-                  choices  = c(
+                  "diag_metric", "Mortality indicator",
+                  choices = c(
                     "\u2083\u2080q\u2083\u2080 (Prob. of dying ages 30\u201360)" = "30q30",
                     "\u2084\u2085q\u2081\u2085 (Prob. of dying ages 15\u201360)" = "45q15",
-                    "e\u2083\u2080 (Life expectancy at age 30)"                     = "e30"
+                    "e\u2083\u2080 (Life expectancy at age 30)"                   = "e30"
                   ),
-                  selected = "30q30",
-                  inline   = TRUE
+                  selected = "30q30", inline = TRUE
                 )
               )
             )
           ),
-
           bslib::layout_columns(
             col_widths = c(6, 6),
 
-            # Sensitivity: Mean Age at Parenthood
             bslib::card(
-              bslib::card_header(
-                "Sensitivity: Mean Age at Parenthood (M\u2099)"
-              ),
+              bslib::card_header("Sensitivity: Mean Age at Parenthood (M\u2099)"),
               bslib::card_body(
                 shiny::fluidRow(
-                  shiny::column(
-                    width = 6,
-                    shiny::numericInput(
-                      inputId = "sens_mn_min",
-                      label   = "Offset from (years)",
-                      value   = -2,
-                      min     = -10,
-                      max     = -0.5,
-                      step    = 0.5
-                    )
-                  ),
-                  shiny::column(
-                    width = 6,
-                    shiny::numericInput(
-                      inputId = "sens_mn_max",
-                      label   = "Offset to (years)",
-                      value   = 2,
-                      min     = 0.5,
-                      max     = 10,
-                      step    = 0.5
-                    )
-                  )
+                  shiny::column(6, shiny::numericInput("sens_mn_min", "Offset from (years)",
+                                                       value=-2, min=-10, max=-0.5, step=0.5)),
+                  shiny::column(6, shiny::numericInput("sens_mn_max", "Offset to (years)",
+                                                       value=2,  min=0.5, max=10,  step=0.5))
                 ),
                 shiny::plotOutput("plot_sens_mn", height = "380px")
               )
             ),
 
-            # Sensitivity: Model Life Table Family
             bslib::card(
-              bslib::card_header(
-                "Sensitivity: Model Life Table Family"
-              ),
+              bslib::card_header("Sensitivity: Model Life Table Family"),
               bslib::card_body(
-                shiny::selectInput(
-                  inputId  = "sens_fam_type",
-                  label    = "Family system",
-                  choices  = c(
-                    "All families" = "All",
-                    "UN families"  = "UN",
-                    "CD families"  = "CD"
-                  ),
-                  selected = "All"
-                ),
+                shiny::selectInput("sens_fam_type", "Family system",
+                                   choices  = c("All families"="All","UN families"="UN","CD families"="CD"),
+                                   selected = "All"),
                 shiny::plotOutput("plot_sens_family", height = "380px")
               )
             )
           )
         )
       )
-    )
-    ,
+    ),
 
     # --- Tab 3: Method Comparison ---
     bslib::nav_panel(
       title = "Method Comparison",
-
-      # Two-column layout: controls left, plot right
       bslib::layout_columns(
         col_widths = c(3, 9),
 
-        # Left column: vertical controls panel
         bslib::card(
           bslib::card_body(
             class = "py-3 px-3",
-
             shiny::radioButtons(
-              inputId  = "comp_metric",
-              label    = "Mortality indicator",
-              choices  = c(
-                "₃₀q₃₀ (Prob. dying 30–60)" = "30q30",
-                "₄₅q₁₅ (Prob. dying 15–60)" = "45q15",
-                "e₃₀ (Life expectancy at 30)"              = "e30"
-              ),
-              selected = "30q30",
-              inline   = FALSE
+              "comp_metric", "Mortality indicator",
+              choices  = c("₃₀q₃₀ (Prob. dying 30\u201360)" = "30q30",
+                           "₄₅q₁₅ (Prob. dying 15\u201360)" = "45q15",
+                           "e₃₀ (Life expectancy at 30)"     = "e30"),
+              selected = "30q30", inline = FALSE
             ),
-
             shiny::tags$hr(style = "margin: 8px 0;"),
-
-            shiny::selectInput(
-              inputId  = "comp_family",
-              label    = "Model life table family",
-              choices  = .FAMILIES,
-              selected = "General"
-            ),
-
+            shiny::selectInput("comp_family", "Model life table family",
+                               choices = .FAMILIES, selected = "General"),
             shiny::tags$hr(style = "margin: 8px 0;"),
-
-            # Method notes — inline, no card, no scroll
             shiny::uiOutput("ui_method_warnings"),
-
             shiny::tags$hr(style = "margin: 8px 0;"),
-
-            # Action buttons at the bottom of the panel
             shiny::tags$div(
               style = "display:flex; gap:6px;",
-              shiny::actionButton(
-                inputId = "run_compare",
-                label   = "Compare",
-                class   = "btn-primary btn-sm"
-              ),
-              shiny::actionButton(
-                inputId = "show_comp_table",
-                label   = shiny::icon("table"),
-                title   = "View estimates table",
-                class   = "btn-outline-secondary btn-sm"
-              ),
-              shiny::downloadButton(
-                outputId = "download_comparison",
-                label    = "",
-                icon     = shiny::icon("download"),
-                title    = "Download estimates",
-                class    = "btn-outline-secondary btn-sm"
-              )
+              shiny::actionButton("run_compare",    "Compare",
+                                  class = "btn-primary btn-sm"),
+              shiny::actionButton("show_comp_table", shiny::icon("table"),
+                                  title = "View estimates table",
+                                  class = "btn-outline-secondary btn-sm"),
+              shiny::downloadButton("download_comparison", "",
+                                    icon  = shiny::icon("download"),
+                                    title = "Download estimates",
+                                    class = "btn-outline-secondary btn-sm")
             )
           )
         ),
 
-        # Right column: plot
         bslib::card(
           full_screen = TRUE,
           bslib::card_header("Mortality Estimates by Method"),
@@ -620,7 +428,7 @@ server <- function(input, output, session) {
 
   output$ui_year_slider <- shiny::renderUI({
     shiny::req(r_estimates())
-    yrs <- stats::na.omit(r_estimates()$estimates$RefTime)
+    yrs <- stats::na.omit(r_estimates()$estimates$RefYear)
     shiny::sliderInput(
       inputId = "year_range",
       label   = "Reference period",
@@ -641,27 +449,22 @@ server <- function(input, output, session) {
     metric <- input$plot_metric
     df_est <- r_estimates()$estimates
     df_sub <- df_est[
-      !is.na(df_est$RefTime) &
-        df_est$RefTime >= input$year_range[1] &
-        df_est$RefTime <= input$year_range[2],
+      !is.na(df_est$RefYear) &
+        df_est$RefYear >= input$year_range[1] &
+        df_est$RefYear <= input$year_range[2],
     ]
 
     p <- ggplot2::ggplot(
       df_sub,
-      ggplot2::aes(x = RefTime, y = .data[[metric]])
+      ggplot2::aes(x = RefYear, y = .data[[metric]])
     ) +
       ggplot2::geom_line(colour = "#2c3e50", linewidth = 0.8) +
       ggplot2::geom_point(size = 2.5) +
-      ggplot2::labs(
-        x = "Reference time (year)",
-        y = ""           # y-axis title set via plotly layout() below
-      ) +
+      ggplot2::labs(x = "Reference year", y = "") +
       ggplot2::theme_minimal(base_size = 13)
 
     plotly::ggplotly(p, tooltip = c("x", "y")) |>
-      plotly::layout(
-        yaxis = list(title = .AXIS_LABELS[[metric]])
-      )
+      plotly::layout(yaxis = list(title = .AXIS_LABELS[[metric]]))
   })
 
   # 4.6 Results table ------------------------------------------------------
@@ -671,7 +474,7 @@ server <- function(input, output, session) {
 
     tab <- r_estimates()$estimates
 
-    # Rename columns to display-friendly labels
+    # Rename mortality index columns to unicode display labels
     rename_map <- c(
       "30q30" = "\u2083\u2080q\u2083\u2080",
       "e30"   = "e\u2083\u2080",
@@ -681,23 +484,20 @@ server <- function(input, output, session) {
       if (old %in% names(tab)) names(tab)[names(tab) == old] <- rename_map[[old]]
     }
 
+    # RefYear formatted without thousand separator; all other numerics rounded
+    numeric_cols <- names(tab)[sapply(tab, is.numeric)]
+    round_cols   <- setdiff(numeric_cols, "RefYear")
+
     DT::datatable(
       tab,
-      rownames  = FALSE,
-      options   = list(
-        pageLength = 10,
-        dom        = "tp",
-        scrollX    = TRUE
-      )
+      rownames = FALSE,
+      options  = list(pageLength = 10, dom = "tp", scrollX = TRUE)
     ) |>
-      DT::formatRound(columns = seq(2L, ncol(tab)), digits = 3L)
+      DT::formatRound(columns = round_cols, digits = 3L) |>
+      DT::formatRound(columns = "RefYear",  digits = 2L, mark = "")
   })
 
   # 4.7 Diagnostic plots ---------------------------------------------------
-  # NOTE: om_plot_linearity() returns a ggplot object directly.
-  # om_sensitivity() and om_sensitivity_family() return S3 objects of class
-  # OrphanhoodSensitivity and OrphanhoodSensitivityFamily respectively;
-  # plot() dispatches to their registered S3 plot methods to render the figure.
 
   output$plot_linearity <- shiny::renderPlot({
     shiny::req(r_estimates())
@@ -707,46 +507,31 @@ server <- function(input, output, session) {
   output$plot_sens_mn <- shiny::renderPlot({
     shiny::req(r_estimates(), input$sens_mn_min, input$sens_mn_max, input$diag_metric)
     shiny::validate(
-      shiny::need(
-        isTRUE(input$sens_mn_min < input$sens_mn_max),
-        "Offset minimum must be less than maximum."
-      )
+      shiny::need(isTRUE(input$sens_mn_min < input$sens_mn_max),
+                  "Offset minimum must be less than maximum.")
     )
     range_m <- seq(input$sens_mn_min, input$sens_mn_max, by = 0.5)
     sens    <- HOME::om_sensitivity(r_estimates(), range_m = range_m)
-    # Pass index if the plot method supports it; otherwise fall back gracefully
-    p <- tryCatch(
-      plot(sens, index = input$diag_metric),
-      error = function(e) plot(sens)
-    )
+    p <- tryCatch(plot(sens, index = input$diag_metric), error = function(e) plot(sens))
     print(p)
   })
 
   output$plot_sens_family <- shiny::renderPlot({
     shiny::req(r_estimates(), input$sens_fam_type, input$diag_metric)
     sens_fam <- HOME::om_sensitivity_family(r_estimates(), type = input$sens_fam_type)
-    p <- tryCatch(
-      plot(sens_fam, index = input$diag_metric),
-      error = function(e) plot(sens_fam)
-    )
+    p <- tryCatch(plot(sens_fam, index = input$diag_metric), error = function(e) plot(sens_fam))
     print(p)
   })
 
   # 4.8 Results export -----------------------------------------------------
 
   output$download_results <- shiny::downloadHandler(
-    filename = function() {
-      paste0("HOME_estimates_", format(Sys.Date(), "%Y%m%d"), ".xlsx")
-    },
-    content = function(file) {
-      writexl::write_xlsx(r_estimates()$estimates, file)
-    }
+    filename = function() paste0("HOME_estimates_", format(Sys.Date(), "%Y%m%d"), ".xlsx"),
+    content  = function(file) writexl::write_xlsx(r_estimates()$estimates, file)
   )
 
   # 4.9 Method comparison ---------------------------------------------------
 
-  # Timaeus coefficients only cover respondent age groups up to 45 (n <= 45).
-  # Age groups 50+ are outside the range of the published weighting factors.
   .TIMAEUS_MAX_AGE <- 45L
 
   r_comparison <- shiny::eventReactive(input$run_compare, {
@@ -772,49 +557,53 @@ server <- function(input, output, session) {
     timaeus <- run_method("timaeus")
     brass   <- run_method("brass")
 
-    # Tag each result with its method label
     if (!is.null(luy))     luy$MethodLabel     <- "Luy (2012)"
     if (!is.null(timaeus)) timaeus$MethodLabel  <- "Timaeus (1992)"
     if (!is.null(brass))   brass$MethodLabel    <- "Brass (1973)"
 
-    results <- do.call(rbind, Filter(Negate(is.null), list(luy, timaeus, brass)))
-    results
+    do.call(rbind, Filter(Negate(is.null), list(luy, timaeus, brass)))
   })
 
-
-  # Combined method limitation warnings (Timaeus + Brass) --------------------
-  # Method notes: compact inline text, no card, no scroll, no gaps
+  # Method limitation warnings
   output$ui_method_warnings <- shiny::renderUI({
     shiny::req(r_data())
-    df      <- r_data()
-    max_age <- max(df$n, na.rm = TRUE)
-    min_age <- min(df$n, na.rm = TRUE)
-    warns   <- list()
+    df    <- r_data()
+    warns <- list()
 
-    if (max_age > .TIMAEUS_MAX_AGE) {
+    if (max(df$n, na.rm = TRUE) > .TIMAEUS_MAX_AGE) {
       warns[["timaeus"]] <- shiny::tags$p(
         style = "color:#856404; font-size:0.78rem; margin:0 0 4px 0; line-height:1.3;",
-        shiny::tags$strong("⚠ Timaeus (1992):"),
+        shiny::tags$strong("\u26a0 Timaeus (1992):"),
         " weights only published up to age group 45."
       )
     }
 
     if (length(warns) > 0L) {
       shiny::tags$div(
-        style = "background:#fffbea; border-left:3px solid #F5C400;
-                 padding:6px 8px; border-radius:3px;",
+        style = "background:#fffbea; border-left:3px solid #F5C400; padding:6px 8px; border-radius:3px;",
         do.call(shiny::tagList, warns)
       )
     }
   })
 
+  # Helper: build comparison table with correct RefYear formatting
+  .comp_table_dt <- function(tab, metric) {
+    DT::datatable(
+      tab,
+      rownames = FALSE,
+      options  = list(pageLength = 15L, dom = "tp", scrollX = TRUE,
+                      order = list(list(0L, "asc"), list(2L, "desc")))
+    ) |>
+      DT::formatRound(columns = c("Alpha", metric), digits = 3L) |>
+      DT::formatRound(columns = "RefYear", digits = 2L, mark = "")
+  }
+
   # Modal table on button click
   shiny::observeEvent(input$show_comp_table, {
     shiny::req(r_comparison())
     metric <- input$comp_metric
-    tab    <- r_comparison()[, c("MethodLabel", "RespondentAge",
-                                 "RefTime", "Alpha", metric)]
-    names(tab) <- c("Method", "Age group", "Reference year", "Alpha", metric)
+    tab    <- r_comparison()[, c("MethodLabel", "Age", "RefYear", "Alpha", metric)]
+    names(tab) <- c("Method", "Age group", "RefYear", "Alpha", metric)
 
     shiny::showModal(shiny::modalDialog(
       title  = "Estimates by Method",
@@ -823,16 +612,7 @@ server <- function(input, output, session) {
         shiny::downloadButton("download_comparison", "Download", class = "btn-sm"),
         shiny::modalButton("Close")
       ),
-      DT::renderDT(
-        DT::datatable(
-          tab,
-          rownames = FALSE,
-          options  = list(pageLength = 15L, dom = "tp", scrollX = TRUE,
-                          order = list(list(0L, "asc"), list(2L, "desc")))
-        ) |>
-          DT::formatRound(columns = c("Reference year", "Alpha", metric),
-                          digits   = 3L)
-      )
+      DT::renderDT(.comp_table_dt(tab, metric))
     ))
   })
 
@@ -840,16 +620,9 @@ server <- function(input, output, session) {
   output$table_comparison <- DT::renderDT({
     shiny::req(r_comparison())
     metric <- input$comp_metric
-    tab    <- r_comparison()[, c("MethodLabel", "RespondentAge",
-                                 "RefTime", "Alpha", metric)]
-    names(tab) <- c("Method", "Age group", "Reference year", "Alpha", metric)
-    DT::datatable(
-      tab,
-      rownames = FALSE,
-      options  = list(pageLength = 15L, dom = "tp", scrollX = TRUE,
-                      order = list(list(0L, "asc"), list(2L, "desc")))
-    ) |>
-      DT::formatRound(columns = c("Reference year", "Alpha", metric), digits = 3L)
+    tab    <- r_comparison()[, c("MethodLabel", "Age", "RefYear", "Alpha", metric)]
+    names(tab) <- c("Method", "Age group", "RefYear", "Alpha", metric)
+    .comp_table_dt(tab, metric)
   })
 
   # Comparison plot
@@ -858,7 +631,7 @@ server <- function(input, output, session) {
 
     df_comp <- r_comparison()
     metric  <- input$comp_metric
-    df_comp <- df_comp[!is.na(df_comp$RefTime) & !is.na(df_comp[[metric]]), ]
+    df_comp <- df_comp[!is.na(df_comp$RefYear) & !is.na(df_comp[[metric]]), ]
 
     pal <- c(
       "Luy (2012)"     = "#003082",
@@ -869,13 +642,13 @@ server <- function(input, output, session) {
     p <- ggplot2::ggplot(
       df_comp,
       ggplot2::aes(
-        x      = RefTime,
+        x      = RefYear,
         y      = .data[[metric]],
         colour = MethodLabel,
         group  = MethodLabel,
         text   = paste0(
           "Method: ", MethodLabel, "<br>",
-          "Year: ",   round(RefTime, 2), "<br>",
+          "Year: ",   round(RefYear, 2), "<br>",
           metric, ": ", round(.data[[metric]], 4)
         )
       )
@@ -883,7 +656,7 @@ server <- function(input, output, session) {
       ggplot2::geom_line(linewidth = 0.9) +
       ggplot2::geom_point(size = 2.5) +
       ggplot2::scale_colour_manual(values = pal) +
-      ggplot2::labs(x = "Reference time (year)", y = "", colour = "Method") +
+      ggplot2::labs(x = "Reference year", y = "", colour = "Method") +
       ggplot2::theme_minimal(base_size = 13) +
       ggplot2::theme(legend.position = "bottom")
 
@@ -896,12 +669,8 @@ server <- function(input, output, session) {
 
   # Comparison export
   output$download_comparison <- shiny::downloadHandler(
-    filename = function() {
-      paste0("HOME_comparison_", format(Sys.Date(), "%Y%m%d"), ".xlsx")
-    },
-    content = function(file) {
-      writexl::write_xlsx(r_comparison(), file)
-    }
+    filename = function() paste0("HOME_comparison_", format(Sys.Date(), "%Y%m%d"), ".xlsx"),
+    content  = function(file) writexl::write_xlsx(r_comparison(), file)
   )
 }
 

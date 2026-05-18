@@ -11,7 +11,7 @@ NULL
 # CRAN NOTE fix: suppress R CMD check warnings for ggplot2 non-standard
 # evaluation variables used in aes() calls throughout this file.
 utils::globalVariables(c(
-  "RefTime", "Offset_M", "Alpha", "RespondentAge", "Family"
+  "RefYear", "Offset_M", "Alpha", "Age", "Family"
 ))
 
 # ------------------------------------------------------------------------------
@@ -62,13 +62,17 @@ utils::globalVariables(c(
 #' @param ... Additional arguments passed to \code{\link{om_estimate_index}},
 #'   overriding values stored in \code{object}.
 #'
-#' @return An object of class \code{OrphanhoodSensitivity}, which is a named
-#'   list with components:
+#' @return An object of class \code{OrphanhoodSensitivity}, a named list with:
 #'   \describe{
-#'     \item{\code{data}}{A data frame of estimates for each offset value,
-#'       with an additional column \code{Offset_M} identifying the offset.}
-#'     \item{\code{meta}}{A list of metadata: variable name, offset range,
-#'       standard level, and estimation method.}
+#'     \item{\code{data}}{
+#'       A data frame of estimates for each offset value, with columns
+#'       matching \code{om_estimate_index()$estimates} plus an additional
+#'       column \code{Offset_M} identifying the applied offset in years.
+#'     }
+#'     \item{\code{meta}}{
+#'       A named list of metadata: variable name, offset range, standard
+#'       level, and estimation method.
+#'     }
 #'   }
 #'
 #' @seealso \code{\link{plot.OrphanhoodSensitivity}},
@@ -108,16 +112,16 @@ om_sensitivity <- function(object  = NULL,
   results <- list()
 
   for (offset in range_m) {
-    curr_args                  <- args
-    curr_args$mean_age_parent  <- base_mn + offset
+    curr_args                 <- args
+    curr_args$mean_age_parent <- base_mn + offset
 
     suppressWarnings({
       res <- do.call(om_estimate_index, curr_args)
     })
 
     if (!is.null(res$estimates)) {
-      df           <- res$estimates
-      df$Offset_M  <- offset
+      df          <- res$estimates
+      df$Offset_M <- offset
       results[[as.character(offset)]] <- df
     }
   }
@@ -138,7 +142,7 @@ om_sensitivity <- function(object  = NULL,
 
 #' Plot Method for \code{OrphanhoodSensitivity} Objects
 #'
-#' Displays estimated mortality indices across reference dates for each
+#' Displays estimated mortality indices across reference years for each
 #' mean-age-of-childbearing offset, coloured from light (low offset) to
 #' dark (high offset).
 #'
@@ -161,7 +165,7 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
   }
 
   ggplot2::ggplot(df, ggplot2::aes(
-    x     = RefTime,
+    x     = RefYear,
     y     = .data[[index]],
     group = Offset_M,
     color = Offset_M
@@ -174,7 +178,7 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
     ) +
     ggplot2::labs(
       title = paste("Sensitivity of", index, "to Mean Age of Childbearing"),
-      x     = "Reference Date",
+      x     = "Reference Year",
       y     = index
     ) +
     ggplot2::theme_bw() +
@@ -199,13 +203,18 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
 #'   overriding \code{type}.
 #' @param ... Additional arguments passed to \code{\link{om_estimate_index}}.
 #'
-#' @return An object of class \code{OrphanhoodSensitivityFamily}, which is a
-#'   named list with components:
+#' @return An object of class \code{OrphanhoodSensitivityFamily}, a named list
+#'   with:
 #'   \describe{
-#'     \item{\code{data}}{A data frame of estimates for each family, with an
-#'       additional column \code{Family} identifying the model life table.}
-#'     \item{\code{meta}}{A list of metadata: variable name, families tested,
-#'       standard level, system name, and estimation method.}
+#'     \item{\code{data}}{
+#'       A data frame of estimates for each family, with columns matching
+#'       \code{om_estimate_index()$estimates} plus an additional column
+#'       \code{Family} identifying the model life table family.
+#'     }
+#'     \item{\code{meta}}{
+#'       A named list of metadata: variable name, families tested, standard
+#'       level, family system name, and estimation method.
+#'     }
 #'   }
 #'
 #' @seealso \code{\link{plot.OrphanhoodSensitivityFamily}},
@@ -262,8 +271,8 @@ om_sensitivity_family <- function(object   = NULL,
     })
 
     if (!is.null(res) && !is.null(res$estimates)) {
-      df         <- res$estimates
-      df$Family  <- fam
+      df        <- res$estimates
+      df$Family <- fam
       results[[fam]] <- df
     }
   }
@@ -289,7 +298,7 @@ om_sensitivity_family <- function(object   = NULL,
 
 #' Plot Method for \code{OrphanhoodSensitivityFamily} Objects
 #'
-#' Displays estimated mortality indices across reference dates for each model
+#' Displays estimated mortality indices across reference years for each model
 #' life table family, distinguished by line type.
 #'
 #' @param x An object of class \code{OrphanhoodSensitivityFamily}.
@@ -311,7 +320,7 @@ plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
   }
 
   ggplot2::ggplot(df, ggplot2::aes(
-    x        = RefTime,
+    x        = RefYear,
     y        = .data[[index]],
     group    = Family,
     linetype = Family
@@ -319,7 +328,7 @@ plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
     ggplot2::geom_line(linewidth = 0.6) +
     ggplot2::labs(
       title    = paste("Sensitivity of", index, "to Model Life Table Family"),
-      x        = "Reference Date",
+      x        = "Reference Year",
       y        = index,
       linetype = NULL
     ) +
@@ -340,7 +349,10 @@ plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
 #'
 #' @param object An object of class \code{OrphanhoodEstimate}.
 #'
-#' @return A \code{ggplot} object.
+#' @return A \code{ggplot} object with respondent age group (\code{Age}) on
+#'   the x-axis and the relational logit level parameter \eqn{\alpha}
+#'   (\code{Alpha}) on the y-axis. A dashed horizontal line marks the median
+#'   \eqn{\alpha} across age groups.
 #'
 #' @seealso \code{\link{om_estimate_index}}, \code{\link{om_dashboard}}
 #'
@@ -366,7 +378,7 @@ om_plot_linearity <- function(object) {
 
   df <- object$estimates
 
-  ggplot2::ggplot(df, ggplot2::aes(x = RespondentAge, y = Alpha)) +
+  ggplot2::ggplot(df, ggplot2::aes(x = Age, y = Alpha)) +
     ggplot2::geom_hline(
       yintercept = stats::median(df$Alpha, na.rm = TRUE),
       linetype   = "dashed",

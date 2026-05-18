@@ -46,12 +46,66 @@ Coale-Demeny families: \code{"West"}, \code{"North"}, \code{"East"},
 \value{
 An object of class \code{OrphanhoodEstimate}, a named list with:
 \describe{
-\item{\code{estimates}}{Data frame of estimated mortality indices by
-respondent age group.}
-\item{\code{meta}}{List of metadata: sex, model family, system type,
-method identifier, and primary index name.}
-\item{\code{inputs}}{List of original input arguments for
-reproducibility and sensitivity analysis.}
+\item{\code{estimates}}{
+Data frame of estimated adult mortality indices by respondent age
+group. Columns:
+\describe{
+\item{\code{Method}}{
+Citation label of the estimation method used.
+}
+\item{\code{RefYear}}{
+Estimated reference year associated with the mortality estimate.
+}
+\item{\code{Age}}{
+Respondent age group used to derive the orphanhood estimate.
+}
+\item{\code{b}}{
+Initial exact age of the conditional survivorship interval.
+}
+\item{\code{n}}{
+Width of the conditional survivorship interval in years
+(\eqn{n = (b+n) - b}).
+}
+\item{\code{n_b}}{
+Terminal exact age of the survivorship interval,
+corresponding to \eqn{b + n}.
+}
+\item{\code{l(b)}}{
+Estimated survivorship at exact age \eqn{b}.
+}
+\item{\code{l(n_b)}}{
+Estimated survivorship at exact age \eqn{b + n}.
+}
+\item{\code{npb}}{
+Estimated conditional survivorship probability
+\eqn{{}_np_b = l(b+n) / l(b)}, representing survival from
+exact age \eqn{b} to exact age \eqn{b + n}.
+}
+\item{\code{Alpha}}{
+Relational logit level parameter \eqn{\alpha} shifting the
+standard life table.
+}
+\item{\code{30q30}}{
+Probability of dying between exact ages 30 and 60.
+}
+\item{\code{45q15}}{
+Probability of dying between exact ages 15 and 60.
+}
+\item{\code{e30}}{
+Life expectancy at exact age 30.
+}
+}
+}
+\item{\code{meta}}{
+Named list of metadata: sex of the parent, model life table family,
+family system type (\code{"UN"} or \code{"CD"}), method identifier,
+and primary index name.
+}
+\item{\code{inputs}}{
+Named list of the original input arguments, retained for
+reproducibility and use by \code{\link{om_sensitivity}} and
+\code{\link{om_sensitivity_family}}.
+}
 }
 }
 \description{
