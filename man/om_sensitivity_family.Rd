@@ -24,13 +24,18 @@ overriding \code{type}.}
 \item{...}{Additional arguments passed to \code{\link{om_estimate_index}}.}
 }
 \value{
-An object of class \code{OrphanhoodSensitivityFamily}, which is a
-named list with components:
+An object of class \code{OrphanhoodSensitivityFamily}, a named list
+with:
 \describe{
-\item{\code{data}}{A data frame of estimates for each family, with an
-additional column \code{Family} identifying the model life table.}
-\item{\code{meta}}{A list of metadata: variable name, families tested,
-standard level, system name, and estimation method.}
+\item{\code{data}}{
+A data frame of estimates for each family, with columns matching
+\code{om_estimate_index()$estimates} plus an additional column
+\code{Family} identifying the model life table family.
+}
+\item{\code{meta}}{
+A named list of metadata: variable name, families tested, standard
+level, family system name, and estimation method.
+}
 }
 }
 \description{

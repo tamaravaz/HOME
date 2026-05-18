@@ -18,13 +18,17 @@ mean age of childbearing. Default: \code{seq(-1.5, 1.5, 0.5)}.}
 overriding values stored in \code{object}.}
 }
 \value{
-An object of class \code{OrphanhoodSensitivity}, which is a named
-list with components:
+An object of class \code{OrphanhoodSensitivity}, a named list with:
 \describe{
-\item{\code{data}}{A data frame of estimates for each offset value,
-with an additional column \code{Offset_M} identifying the offset.}
-\item{\code{meta}}{A list of metadata: variable name, offset range,
-standard level, and estimation method.}
+\item{\code{data}}{
+A data frame of estimates for each offset value, with columns
+matching \code{om_estimate_index()$estimates} plus an additional
+column \code{Offset_M} identifying the applied offset in years.
+}
+\item{\code{meta}}{
+A named list of metadata: variable name, offset range, standard
+level, and estimation method.
+}
 }
 }
 \description{

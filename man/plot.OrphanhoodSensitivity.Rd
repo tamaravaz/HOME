@@ -18,7 +18,7 @@
 A \code{ggplot} object.
 }
 \description{
-Displays estimated mortality indices across reference dates for each
+Displays estimated mortality indices across reference years for each
 mean-age-of-childbearing offset, coloured from light (low offset) to
 dark (high offset).
 }

@@ -18,7 +18,7 @@
 A \code{ggplot} object.
 }
 \description{
-Displays estimated mortality indices across reference dates for each model
+Displays estimated mortality indices across reference years for each model
 life table family, distinguished by line type.
 }
 \seealso{

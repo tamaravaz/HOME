@@ -10,7 +10,10 @@ om_plot_linearity(object)
 \item{object}{An object of class \code{OrphanhoodEstimate}.}
 }
 \value{
-A \code{ggplot} object.
+A \code{ggplot} object with respondent age group (\code{Age}) on
+the x-axis and the relational logit level parameter \eqn{\alpha}
+(\code{Alpha}) on the y-axis. A dashed horizontal line marks the median
+\eqn{\alpha} across age groups.
 }
 \description{
 Displays the estimated Brass logit \eqn{\alpha} parameter across respondent

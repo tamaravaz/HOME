@@ -63,8 +63,7 @@ Respondent age group used to derive the orphanhood estimate.
 Initial exact age of the conditional survivorship interval.
 }
 \item{\code{n}}{
-Width of the conditional survivorship interval in years
-(\eqn{n = (b+n) - b}).
+Width of the conditional survivorship interval in years.
 }
 \item{\code{n_b}}{
 Terminal exact age of the survivorship interval,
