@@ -54,35 +54,43 @@ group. Columns:
 Citation label of the estimation method used.
 }
 \item{\code{RefYear}}{
-Estimated reference year associated with the mortality estimate.
+Estimated reference year of the mortality estimate, expressed
+as a decimal year.
 }
 \item{\code{Age}}{
-Respondent age group used to derive the orphanhood estimate.
+Lower bound of the respondent age group (\eqn{n}) used to
+derive the orphanhood estimate.
 }
 \item{\code{b}}{
 Initial exact age of the conditional survivorship interval.
-}
-\item{\code{n}}{
-Width of the conditional survivorship interval in years.
+Equals 30 for Luy (2012); 25 for Timaeus (1992) females,
+35 for males; 25 for Brass (1973) females, 32.5 or 37.5
+for males depending on \eqn{\bar{M}}.
 }
 \item{\code{n_b}}{
-Terminal exact age of the survivorship interval,
-corresponding to \eqn{b + n}.
+Terminal exact age of the survivorship interval
+(\eqn{b + \text{duration}}). For Luy (2012) this equals
+\eqn{33 + n}.
 }
 \item{\code{l(b)}}{
-Estimated survivorship at exact age \eqn{b}.
+Estimated survivorship at exact age \eqn{b}, derived from
+the relational logit model.
 }
 \item{\code{l(n_b)}}{
-Estimated survivorship at exact age \eqn{b + n}.
+Estimated survivorship at exact age \eqn{n\_b}, derived from
+the relational logit model.
 }
-\item{\code{npb}}{
-Estimated conditional survivorship probability
-\eqn{{}_np_b = l(b+n) / l(b)}, representing survival from
-exact age \eqn{b} to exact age \eqn{b + n}.
+\item{\code{lx_ratio}}{
+Conditional survivorship probability \eqn{l(n\_b) / l(b)},
+i.e.\ the probability of surviving from exact age \eqn{b}
+to exact age \eqn{n\_b}. This is the key observable quantity
+derived from the orphanhood method and used to estimate
+\code{Alpha}.
 }
 \item{\code{Alpha}}{
-Relational logit level parameter \eqn{\alpha} shifting the
-standard life table.
+Relational logit level parameter \eqn{\alpha} estimated by
+solving \eqn{l(n\_b) / l(b) = \text{lx\_ratio}} against the
+standard life table. Higher values indicate lower mortality.
 }
 \item{\code{30q30}}{
 Probability of dying between exact ages 30 and 60.
