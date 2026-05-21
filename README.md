@@ -1,84 +1,327 @@
 # HOME: Harmonized Orphanhood Mortality Estimation
 
-**HOME** is an R package designed to implement, compare, and diagnose indirect mortality estimation methods based on orphanhood data.
+<!-- badges: start -->
+<!-- badges: end -->
 
-## Key Features
+**HOME** is an R package for indirect adult mortality estimation from orphanhood data. It provides a unified and reproducible framework for implementing classical and modern orphanhood methods, harmonizing estimates into common mortality indices, and evaluating the sensitivity of results to key structural assumptions.
 
-* **Multi-Method Estimation:** Implements standard methods (Brass, Timaeus) and modern adaptations for low-mortality settings (Luy, 2012).
-* **Diagnostic Suite:** Tools to assess internal consistency of orphanhood-based estimates by examining the stability of the estimated mortality level (alpha) across respondent age groups, and by evaluating sensitivity to assumptions on the age pattern of mortality and the mean age of childbearing.
-* **Metric Flexibility:** Calculates multiple indicators simultaneously:
-    * `45q15`: Probability of dying between ages 15 and 60 (Standard).
-    * `30q30`: Probability of dying between ages 30 and 60 (Robust).
-    * `e30`: Life expectancy at age 30 (Policy-relevant).
-* **Interactive Dashboard:** A built-in Shiny application for non-coders to perform analyses and sensitivity checks via a GUI.
+The package emphasizes **diagnostic transparency** by exposing methodological assumptions directly to the analyst and providing tools for internal consistency checks and sensitivity analysis.
 
-## 📦 Installation
+HOME implements three major orphanhood estimation approaches:
 
-You can install the development version of HOME directly from GitHub:
+- **Brass & Hill (1973)** — classical weighted survivorship estimator.
+- **Timaeus (1992)** — regression-based adaptation designed to reduce sensitivity to mortality schedules.
+- **Luy (2012)** — calibrated for low- and moderate-mortality settings using empirically derived weighting schemes.
 
-```r
-# If you do not have devtools installed:
-# install.packages("devtools")
+---
 
-devtools::install_github("tamaravaz/HOME", dependencies = T)
+## Features
+
+### Unified Estimation Framework
+
+HOME harmonizes orphanhood-derived survivorship ratios into a common relational logit framework using a one-parameter Brass relational model. This allows direct comparison across methods and mortality schedules.
+
+### Multiple Mortality Indicators
+
+The package simultaneously estimates:
+
+- `30q30` — probability of dying between ages 30 and 60.
+- `45q15` — probability of dying between ages 15 and 60.
+- `e30` — life expectancy at age 30.
+
+### Diagnostic Sensitivity Analysis
+
+HOME includes built-in diagnostics for evaluating:
+
+- Internal consistency of orphanhood estimates across respondent age groups.
+- Sensitivity to assumptions on:
+  - mean age at childbearing,
+  - model life table family,
+  - mortality schedules,
+  - estimation method.
+
+### Interactive Shiny Dashboard
+
+An interactive GUI allows users to:
+
+- upload survey data,
+- run all estimation methods,
+- compare mortality schedules,
+- inspect diagnostic plots,
+- export results tables.
+
+---
+
+# Installation
+
+Install the development version directly from GitHub:
+
+```{r eval=FALSE}
+# install.packages("remotes")
+
+remotes::install_github("tamaravaz/HOME")
+
+library(HOME)
 ```
 
-## Quick Start: Estimating Mortality
+---
 
-```r
-# Input data: Respondent age, Proportion of mothers alive (Sn), Mean age of childbearing (Mn)
+# Core Workflow
+
+The main estimation function is:
+
+```{r eval=FALSE}
+om_estimate_index()
+```
+
+It returns an object of class:
+
+```{r eval=FALSE}
+OrphanhoodEstimate
+```
+
+containing:
+
+- estimated survivorship ratios,
+- reference dates,
+- Brass relational logit levels (`Alpha`),
+- mortality indices,
+- metadata,
+- original inputs for reproducibility.
+
+---
+
+# Quick Start
+
+## Input Data
+
+```{r}
+library(HOME)
+
 df_input <- data.frame(
-  age_n = seq(15,60,5),
-  Sn = c(0.95772787,0.94418605,0.89402174,0.84395199,0.77974435,0.67717391,0.49225268,0.33670034,0.20071685,0.09517426),
-  Mn = rep(24,10)
+  age_n = seq(15, 60, 5),
+  Sn = c(
+    0.95772787, 0.94418605, 0.89402174,
+    0.84395199, 0.77974435, 0.67717391,
+    0.49225268, 0.33670034, 0.20071685,
+    0.09517426
+  ),
+  Mn = c(
+    24.52, 24.20, 23.70, 23.48, 23.26,
+    23.44, 22.00, 23.37, 21.07, 19.93
+  )
 )
-# Run the estimation using the Luy (2012) method
-# This creates an 'OrphanhoodEstimate' object containing metadata and inputs
-est <- om_estimate_index(
-  method = "luy",              
+
+survey_date <- 2024.753
+```
+
+Where:
+
+- `age_n` = lower bound of respondent age group,
+- `Sn` = proportion with surviving parent,
+- `Mn` = mean age at childbearing.
+
+---
+
+## Estimation
+
+### Luy (2012)
+
+```{r eval=FALSE}
+est_luy <- om_estimate_index(
+  method = "luy",
   sex_parent = "Female",
   age_respondent = df_input$age_n,
   p_surv = df_input$Sn,
   mean_age_parent = df_input$Mn,
-  surv_date = 2024.75,         
-  model_family = "General", std_level = 60  
-)
-
-# Plots the logit-transformed residuals (Alpha) across age groups
-om_plot_linearity(est)
-# Re-runs the model with perturbed M values
-sens_m <- om_sensitivity(est, range_m = seq(-1.5, 1.5, 0.5))
-plot(sens_m, index = "e30")
-
-# Re-runs the model using all UN families (General, South Asian, etc.)
-sens_fam <- om_sensitivity_family(est, type = "UN")
-plot(sens_fam, index = "30q30")
-
-# Generates a composite view of linearity and sensitivity
-om_dashboard(est, index = "e30", family_type = "UN")
-df_input <- data.table(
-  age_n = seq(20, 50, by = 5),
-  Sn    = c(0.97, 0.96, 0.95, 0.85, 0.78, 0.69, 0.58),
-  Mn    = rep(26.2, 7) 
+  surv_date = survey_date,
+  model_family = "General"
 )
 ```
 
-## Interactive Dashboard
-```r
-library(HOME)
+### Brass & Hill (1973)
 
-# This will open the dashboard in your default web browser
+```{r eval=FALSE}
+est_brass <- om_estimate_index(
+  method = "brass",
+  sex_parent = "Female",
+  age_respondent = df_input$age_n,
+  p_surv = df_input$Sn,
+  mean_age_parent = df_input$Mn,
+  surv_date = survey_date,
+  model_family = "General"
+)
+```
+
+### Timaeus (1992)
+
+```{r eval=FALSE}
+est_timaeus <- om_estimate_index(
+  method = "timaeus",
+  sex_parent = "Female",
+  age_respondent = df_input$age_n,
+  p_surv = df_input$Sn,
+  mean_age_parent = df_input$Mn,
+  surv_date = survey_date,
+  model_family = "General"
+)
+```
+
+---
+
+# Summary and Diagnostics
+
+## Summary
+
+```{r eval=FALSE}
+summary(est_luy)
+```
+
+Example output:
+
+```text
+Summary for Female parent mortality (index: 30q30):
+
+Range: 0.1164 – 0.2168
+Mean: 0.1614
+Median: 0.1463
+```
+
+---
+
+# Internal Consistency Diagnostics
+
+The sequence of Brass relational logit parameters (`Alpha`) provides an internal consistency diagnostic across respondent age groups. Under smooth secular mortality decline, estimates should vary gradually across age groups.
+
+```{r eval=FALSE}
+om_plot_linearity(est_luy)
+```
+
+Returns a `ggplot2` object.
+
+---
+
+# Sensitivity Analysis
+
+## Sensitivity to Mean Age at Childbearing
+
+```{r eval=FALSE}
+sens_m <- om_sensitivity(
+  est_luy,
+  range_m = seq(-2, 2, by = 0.5)
+)
+
+plot(sens_m, index = "30q30")
+```
+
+This evaluates how uncertainty in fertility timing propagates into mortality estimates.
+
+---
+
+## Sensitivity to Model Life Table Family
+
+```{r eval=FALSE}
+sens_fam <- om_sensitivity_family(
+  est_luy,
+  type = "All"
+)
+
+plot(sens_fam, index = "e30")
+```
+
+Available family groups:
+
+- `"UN"`
+- `"CD"` (Coale–Demeny)
+- `"All"`
+
+---
+
+# Combined Diagnostic Dashboard
+
+```{r eval=FALSE}
+om_dashboard(
+  est_luy,
+  index = "30q30",
+  family_type = "UN"
+)
+```
+
+This combines:
+
+- linearity diagnostics,
+- family sensitivity analysis,
+- fertility timing sensitivity analysis,
+
+into a single visualization panel.
+
+---
+
+# Interactive Application
+
+Launch the Shiny application:
+
+```{r eval=FALSE}
 app_HOME()
 ```
 
+The dashboard includes:
 
-## 📄 Methodology & Diagnostics
+- interactive trend plots,
+- downloadable tables,
+- diagnostic tabs,
+- method comparison panels,
+- support for `.csv` and `.xlsx` uploads.
 
-The package operationalizes the diagnostic framework described in the accompanying working paper. It addresses the trade-off between stability (favored by bounded metrics like 30q30|45q15) and communicability (favored by e30).
-Key diagnostic plots included in the package allow users to assess
+Expected input columns:
 
-  1. Internal Consistency: The linearity of logit-transformed residuals ($\alpha$) across age groups.
-  1. Parameter Sensitivity: How errors in the Mean Age of Childbearing ($\bar{M}$) affect final life expectancy estimates.
-  
-* If you use HOME in your research, please cite the working paper: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+| Column | Description |
+|---|---|
+| `n` | Lower bound of respondent age group |
+| `sn` | Proportion with parent alive |
+| `mn` | Mean age at childbearing |
 
+---
+
+# Conceptual Framework
+
+HOME treats orphanhood estimation as a **sensitivity-based inferential workflow** rather than a single deterministic estimator.
+
+The package is designed to support:
+
+- reproducible demographic workflows,
+- transparent reporting of structural uncertainty,
+- comparison across mortality schedules,
+- evaluation of methodological robustness.
+
+The package is particularly useful for populations lacking reliable mortality registration systems, including:
+
+- marginalized populations,
+- ethnic minorities,
+- migrant populations,
+- conflict-affected populations,
+- populations absent from routine administrative statistics.
+
+---
+
+# Citation
+
+If you use HOME in research, please cite:
+
+```bibtex
+@article{vaz2025home,
+  title   = {HOME: An R Package for Orphanhood-Based Adult Mortality Estimation with Diagnostic Sensitivity Analysis},
+  author  = {Vaz, Tamara and Shen, Tianyu},
+  journal = {NA},
+  year    = {2026},
+  note    = {Forthcoming}
+}
+```
+
+---
+
+# References
+
+- Brass W, Hill K (1973). *Estimating Adult Mortality from Orphanhood*.
+- Timaeus IM (1992). *Estimation of Adult Mortality from Paternal Orphanhood*.
+- Luy M (2012). *Estimating Mortality Differences in Developed Countries from Survey Information on Maternal and Paternal Orphanhood*.
