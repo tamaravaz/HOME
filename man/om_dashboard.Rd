@@ -26,32 +26,30 @@ Default: \code{"UN"}.}
 childbearing. Default: \code{seq(-1.5, 1.5, 0.5)}.}
 }
 \value{
-If \pkg{gridExtra} is available, arranges and displays the three
-plots and returns the \code{gtable} object invisibly. Otherwise returns a
-named list with elements \code{Linearity}, \code{Sensitivity_M}, and
-\code{Sensitivity_Family}.
+Invisibly returns the \code{gtable} object produced by
+  \code{gridExtra::grid.arrange()}.
 }
 \description{
 Produces a three-panel diagnostic display combining the internal consistency
 check with sensitivity analyses for mean age of childbearing and model life
-table family. Requires the \pkg{gridExtra} package.
+table family.
 }
 \examples{
-\dontrun{
-  result <- om_estimate_index(
-    method          = "luy",
-    sex_parent      = "Female",
-    age_respondent  = seq(20, 60, by = 5),
-    p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
-                        0.835, 0.769, 0.669, 0.565),
-    mean_age_parent = rep(27, 9),
-    surv_date       = 1998.5
-  )
-  om_dashboard(result, index = "30q30", family_type = "UN")
-}
+result <- om_estimate_index(
+  method          = "luy",
+  sex_parent      = "Female",
+  age_respondent  = seq(20, 60, by = 5),
+  p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
+                      0.835, 0.769, 0.669, 0.565),
+  mean_age_parent = rep(27, 9),
+  surv_date       = 1998.5
+)
+
+om_dashboard(result, index = "30q30", family_type = "UN")
 
 }
 \seealso{
-\code{\link{om_plot_linearity}}, \code{\link{om_sensitivity}},
-\code{\link{om_sensitivity_family}}
+\code{\link{om_plot_linearity}},
+  \code{\link{om_sensitivity}},
+  \code{\link{om_sensitivity_family}}
 }

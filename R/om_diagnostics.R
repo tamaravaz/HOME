@@ -79,7 +79,6 @@ utils::globalVariables(c(
 #'   \code{\link{om_sensitivity_family}}, \code{\link{om_estimate_index}}
 #'
 #' @examples
-#' \dontrun{
 #'   result <- om_estimate_index(
 #'     method          = "luy",
 #'     sex_parent      = "Female",
@@ -91,7 +90,6 @@ utils::globalVariables(c(
 #'   )
 #'   sens <- om_sensitivity(result, range_m = seq(-2, 2, by = 0.5))
 #'   plot(sens, index = "30q30")
-#' }
 #'
 #' @export
 om_sensitivity <- function(object  = NULL,
@@ -136,7 +134,7 @@ om_sensitivity <- function(object  = NULL,
     )
   )
 
-  class(out) <- "OrphanhoodSensitivity"
+  class(out) <- c("OrphanhoodSensitivity", "OrphanhoodSensitivityBase")
   out
 }
 
@@ -164,13 +162,18 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
          call. = FALSE)
   }
 
-  ggplot2::ggplot(df, ggplot2::aes(
+  # Identify groups with more than one non-NA observation to avoid
+  # "each group consists of only one observation" warnings from geom_line().
+  counts    <- tapply(!is.na(df$RefYear), df$Offset_M, sum)
+  df_lines  <- df[df$Offset_M %in% names(counts[counts > 1L]), ]
+  df_points <- df[df$Offset_M %in% names(counts[counts <= 1L]), ]
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(
     x     = RefYear,
     y     = .data[[index]],
     group = Offset_M,
     color = Offset_M
   )) +
-    ggplot2::geom_line(linewidth = 0.6, alpha = 0.8) +
     ggplot2::scale_color_gradient(
       low  = "grey80",
       high = "black",
@@ -183,6 +186,14 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
     ) +
     ggplot2::theme_bw() +
     ggplot2::theme(legend.position = "bottom")
+
+  if (nrow(df_lines) > 0L)
+    p <- p + ggplot2::geom_line(data = df_lines, linewidth = 0.6,
+                                alpha = 0.8, na.rm = TRUE)
+  if (nrow(df_points) > 0L)
+    p <- p + ggplot2::geom_point(data = df_points, size = 2,
+                                 alpha = 0.8, na.rm = TRUE)
+  p
 }
 
 # ------------------------------------------------------------------------------
@@ -221,7 +232,6 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
 #'   \code{\link{om_sensitivity}}, \code{\link{om_estimate_index}}
 #'
 #' @examples
-#' \dontrun{
 #'   result <- om_estimate_index(
 #'     method          = "luy",
 #'     sex_parent      = "Female",
@@ -233,7 +243,6 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
 #'   )
 #'   sens_fam <- om_sensitivity_family(result, type = "UN")
 #'   plot(sens_fam, index = "30q30")
-#' }
 #'
 #' @export
 om_sensitivity_family <- function(object   = NULL,
@@ -292,7 +301,7 @@ om_sensitivity_family <- function(object   = NULL,
     )
   )
 
-  class(out) <- "OrphanhoodSensitivityFamily"
+  class(out) <- c("OrphanhoodSensitivityFamily", "OrphanhoodSensitivityBase")
   out
 }
 
@@ -319,13 +328,18 @@ plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
          call. = FALSE)
   }
 
-  ggplot2::ggplot(df, ggplot2::aes(
+  # Identify groups with more than one non-NA observation to avoid
+  # "each group consists of only one observation" warnings from geom_line().
+  counts    <- tapply(!is.na(df$RefYear), df$Family, sum)
+  df_lines  <- df[df$Family %in% names(counts[counts > 1L]), ]
+  df_points <- df[df$Family %in% names(counts[counts <= 1L]), ]
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(
     x        = RefYear,
     y        = .data[[index]],
     group    = Family,
     linetype = Family
   )) +
-    ggplot2::geom_line(linewidth = 0.6) +
     ggplot2::labs(
       title    = paste("Sensitivity of", index, "to Model Life Table Family"),
       x        = "Reference Year",
@@ -334,6 +348,12 @@ plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
     ) +
     ggplot2::theme_bw() +
     ggplot2::theme(legend.position = "bottom")
+
+  if (nrow(df_lines) > 0L)
+    p <- p + ggplot2::geom_line(data = df_lines, linewidth = 0.6, na.rm = TRUE)
+  if (nrow(df_points) > 0L)
+    p <- p + ggplot2::geom_point(data = df_points, size = 2, na.rm = TRUE)
+  p
 }
 
 # ------------------------------------------------------------------------------
@@ -357,7 +377,6 @@ plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
 #' @seealso \code{\link{om_estimate_index}}, \code{\link{om_dashboard}}
 #'
 #' @examples
-#' \dontrun{
 #'   result <- om_estimate_index(
 #'     method          = "luy",
 #'     sex_parent      = "Female",
@@ -368,7 +387,6 @@ plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
 #'     surv_date       = 1998.5
 #'   )
 #'   om_plot_linearity(result)
-#' }
 #'
 #' @export
 om_plot_linearity <- function(object) {
@@ -402,7 +420,7 @@ om_plot_linearity <- function(object) {
 #'
 #' Produces a three-panel diagnostic display combining the internal consistency
 #' check with sensitivity analyses for mean age of childbearing and model life
-#' table family. Requires the \pkg{gridExtra} package.
+#' table family.
 #'
 #' @param object An object of class \code{OrphanhoodEstimate}.
 #' @param index Character. Mortality index to display in sensitivity panels.
@@ -414,33 +432,32 @@ om_plot_linearity <- function(object) {
 #' @param range_m Numeric vector. Offsets applied to the mean age of
 #'   childbearing. Default: \code{seq(-1.5, 1.5, 0.5)}.
 #'
-#' @return If \pkg{gridExtra} is available, arranges and displays the three
-#'   plots and returns the \code{gtable} object invisibly. Otherwise returns a
-#'   named list with elements \code{Linearity}, \code{Sensitivity_M}, and
-#'   \code{Sensitivity_Family}.
+#' @return Invisibly returns the \code{gtable} object produced by
+#'   \code{gridExtra::grid.arrange()}.
 #'
-#' @seealso \code{\link{om_plot_linearity}}, \code{\link{om_sensitivity}},
+#' @seealso \code{\link{om_plot_linearity}},
+#'   \code{\link{om_sensitivity}},
 #'   \code{\link{om_sensitivity_family}}
 #'
 #' @examples
-#' \dontrun{
-#'   result <- om_estimate_index(
-#'     method          = "luy",
-#'     sex_parent      = "Female",
-#'     age_respondent  = seq(20, 60, by = 5),
-#'     p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
-#'                         0.835, 0.769, 0.669, 0.565),
-#'     mean_age_parent = rep(27, 9),
-#'     surv_date       = 1998.5
-#'   )
-#'   om_dashboard(result, index = "30q30", family_type = "UN")
-#' }
+#' result <- om_estimate_index(
+#'   method          = "luy",
+#'   sex_parent      = "Female",
+#'   age_respondent  = seq(20, 60, by = 5),
+#'   p_surv          = c(0.987, 0.967, 0.934, 0.908, 0.882,
+#'                       0.835, 0.769, 0.669, 0.565),
+#'   mean_age_parent = rep(27, 9),
+#'   surv_date       = 1998.5
+#' )
+#'
+#' om_dashboard(result, index = "30q30", family_type = "UN")
 #'
 #' @export
 om_dashboard <- function(object,
                          index       = "30q30",
                          family_type = "UN",
                          range_m     = seq(-1.5, 1.5, 0.5)) {
+
   if (!inherits(object, "OrphanhoodEstimate")) {
     stop("'object' must be of class 'OrphanhoodEstimate'.", call. = FALSE)
   }
@@ -452,23 +469,128 @@ om_dashboard <- function(object,
   p2 <- plot(sens_m,   index = index)
   p3 <- plot(sens_fam, index = index)
 
-  if (requireNamespace("gridExtra", quietly = TRUE)) {
-    g <- gridExtra::grid.arrange(
-      p1,
-      gridExtra::arrangeGrob(p2, p3, ncol = 2L),
-      nrow = 2L,
-      top  = paste("Diagnostics \u2014", toupper(object$meta$method_id))
-    )
-    invisible(g)
+  g <- gridExtra::grid.arrange(
+    p1,
+    gridExtra::arrangeGrob(p2, p3, ncol = 2L),
+    nrow = 2L,
+    top  = paste("Diagnostics -", toupper(object$meta$method_id))
+  )
+
+  invisible(g)
+}
+
+# ------------------------------------------------------------------------------
+# print / summary methods for sensitivity classes
+# ------------------------------------------------------------------------------
+
+#' Print Method for \code{OrphanhoodSensitivity} Objects
+#'
+#' Prints a concise summary of a mean-age-of-childbearing sensitivity analysis.
+#'
+#' @param x An object of class \code{OrphanhoodSensitivity}.
+#' @param ... Further arguments (currently unused).
+#'
+#' @return Invisibly returns \code{x}.
+#' @export
+print.OrphanhoodSensitivity <- function(x, ...) {
+  cat("\n=== Sensitivity Analysis: Mean Age of Childbearing ===\n")
+  cat(sprintf("Method:    %s\n", x$meta$method))
+  cat(sprintf("Offsets:   %s (years)\n",
+              paste(x$meta$range, collapse = ", ")))
+  cat(sprintf("N offsets: %d\n", length(x$meta$range)))
+  cat(sprintf("N rows:    %d\n\n", nrow(x$data)))
+  cat("Use plot(x, index = \"30q30\") to visualise results.\n")
+  invisible(x)
+}
+
+#' Summary Method for \code{OrphanhoodSensitivity} Objects
+#'
+#' Summarises the range of estimated mortality indices across all
+#' mean-age-of-childbearing offsets.
+#'
+#' @param object An object of class \code{OrphanhoodSensitivity}.
+#' @param index Character. Mortality index to summarise. One of
+#'   \code{"30q30"}, \code{"45q15"}, or \code{"e30"}.
+#'   Default: \code{"30q30"}.
+#' @param ... Further arguments (currently unused).
+#'
+#' @return Invisibly returns \code{object}.
+#' @export
+summary.OrphanhoodSensitivity <- function(object, index = "30q30", ...) {
+  cat(sprintf("Sensitivity of '%s' to Mean Age of Childbearing (M):\n", index))
+  cat(sprintf("  Method:  %s\n", object$meta$method))
+  cat(sprintf("  Offsets: %s years\n",
+              paste(range(object$meta$range), collapse = " to ")))
+
+  if (index %in% names(object$data)) {
+    vals <- stats::na.omit(object$data[[index]])
+    if (length(vals) > 0L) {
+      cat(sprintf("  %s range:  %.4f to %.4f\n", index, min(vals), max(vals)))
+      cat(sprintf("  Spread:        %.4f (max - min)\n", diff(range(vals))))
+    } else {
+      cat("  No valid estimates found.\n")
+    }
   } else {
-    message(
-      "Install the 'gridExtra' package for a combined dashboard layout. ",
-      "Returning individual plots as a list."
-    )
-    list(
-      Linearity          = p1,
-      Sensitivity_M      = p2,
-      Sensitivity_Family = p3
-    )
+    cat(sprintf("  Index '%s' not found in results.\n", index))
   }
+  invisible(object)
+}
+
+#' Print Method for \code{OrphanhoodSensitivityFamily} Objects
+#'
+#' Prints a concise summary of a model life table family sensitivity analysis.
+#'
+#' @param x An object of class \code{OrphanhoodSensitivityFamily}.
+#' @param ... Further arguments (currently unused).
+#'
+#' @return Invisibly returns \code{x}.
+#' @export
+print.OrphanhoodSensitivityFamily <- function(x, ...) {
+  cat("\n=== Sensitivity Analysis: Model Life Table Family ===\n")
+  cat(sprintf("Method:    %s\n", x$meta$method))
+  cat(sprintf("System:    %s\n", x$meta$system))
+  cat(sprintf("Families:  %s\n", paste(x$meta$range, collapse = ", ")))
+  cat(sprintf("N families:%d\n", length(x$meta$range)))
+  cat(sprintf("N rows:    %d\n\n", nrow(x$data)))
+  cat("Use plot(x, index = \"30q30\") to visualise results.\n")
+  invisible(x)
+}
+
+#' Summary Method for \code{OrphanhoodSensitivityFamily} Objects
+#'
+#' Summarises the range of estimated mortality indices across all model life
+#' table families tested.
+#'
+#' @param object An object of class \code{OrphanhoodSensitivityFamily}.
+#' @param index Character. Mortality index to summarise. One of
+#'   \code{"30q30"}, \code{"45q15"}, or \code{"e30"}.
+#'   Default: \code{"30q30"}.
+#' @param ... Further arguments (currently unused).
+#'
+#' @return Invisibly returns \code{object}.
+#' @export
+summary.OrphanhoodSensitivityFamily <- function(object, index = "30q30", ...) {
+  cat(sprintf("Sensitivity of '%s' to Model Life Table Family:\n", index))
+  cat(sprintf("  Method:  %s\n", object$meta$method))
+  cat(sprintf("  System:  %s\n", object$meta$system))
+  cat(sprintf("  Families tested: %s\n", paste(object$meta$range, collapse = ", ")))
+
+  if (index %in% names(object$data)) {
+    vals <- stats::na.omit(object$data[[index]])
+    if (length(vals) > 0L) {
+      by_fam <- tapply(object$data[[index]], object$data$Family,
+                       function(v) mean(v, na.rm = TRUE))
+      cat(sprintf("  %s range:  %.4f to %.4f\n", index, min(vals), max(vals)))
+      cat(sprintf("  Spread:        %.4f (max - min)\n", diff(range(vals))))
+      cat("  Mean by family:\n")
+      for (nm in names(by_fam)) {
+        cat(sprintf("    %-20s %.4f\n", nm, by_fam[[nm]]))
+      }
+    } else {
+      cat("  No valid estimates found.\n")
+    }
+  } else {
+    cat(sprintf("  Index '%s' not found in results.\n", index))
+  }
+  invisible(object)
 }

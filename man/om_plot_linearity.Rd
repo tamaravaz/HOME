@@ -11,9 +11,9 @@ om_plot_linearity(object)
 }
 \value{
 A \code{ggplot} object with respondent age group (\code{Age}) on
-the x-axis and the relational logit level parameter \eqn{\alpha}
-(\code{Alpha}) on the y-axis. A dashed horizontal line marks the median
-\eqn{\alpha} across age groups.
+  the x-axis and the relational logit level parameter \eqn{\alpha}
+  (\code{Alpha}) on the y-axis. A dashed horizontal line marks the median
+  \eqn{\alpha} across age groups.
 }
 \description{
 Displays the estimated Brass logit \eqn{\alpha} parameter across respondent
@@ -22,7 +22,6 @@ of the orphanhood-based estimates; a systematic trend suggests age-reporting
 errors, adoption effects, or structural changes in mortality.
 }
 \examples{
-\dontrun{
   result <- om_estimate_index(
     method          = "luy",
     sex_parent      = "Female",
@@ -33,7 +32,6 @@ errors, adoption effects, or structural changes in mortality.
     surv_date       = 1998.5
   )
   om_plot_linearity(result)
-}
 
 }
 \seealso{

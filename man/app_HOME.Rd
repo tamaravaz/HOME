@@ -8,8 +8,8 @@ app_HOME()
 }
 \value{
 This function is called for its side effect of launching a Shiny
-application. It does not return a meaningful value; the return value of
-\code{shiny::runApp()} is returned invisibly.
+  application. It does not return a meaningful value; the return value of
+  \code{shiny::runApp()} is returned invisibly.
 }
 \description{
 Opens the interactive dashboard for indirect adult mortality estimation
@@ -21,17 +21,17 @@ The application provides a graphical interface to \code{\link{om_estimate_index}
 \details{
 The Shiny application is located in \code{inst/shiny/home_app/} and is
 launched via \code{shiny::runApp()}. An active R session with the
-\pkg{shiny}, \pkg{bslib}, \pkg{plotly}, \pkg{DT}, \pkg{readxl}, and
-\pkg{writexl} packages is required; these are listed under \code{Suggests}
-in the package \code{DESCRIPTION} file.
+\pkg{shiny}, \pkg{bslib}, \pkg{ggplot2}, \pkg{plotly}, \pkg{DT},
+\pkg{readxl}, and \pkg{writexl} packages is required; these are listed
+under \code{Suggests} in the package \code{DESCRIPTION} file.
 }
 \examples{
-\dontrun{
+if (interactive()) {
   app_HOME()
 }
 
 }
 \seealso{
 \code{\link{om_estimate_index}} for the underlying estimation
-function.
+  function.
 }

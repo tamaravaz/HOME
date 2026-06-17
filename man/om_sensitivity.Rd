@@ -19,17 +19,17 @@ overriding values stored in \code{object}.}
 }
 \value{
 An object of class \code{OrphanhoodSensitivity}, a named list with:
-\describe{
-\item{\code{data}}{
-A data frame of estimates for each offset value, with columns
-matching \code{om_estimate_index()$estimates} plus an additional
-column \code{Offset_M} identifying the applied offset in years.
-}
-\item{\code{meta}}{
-A named list of metadata: variable name, offset range, standard
-level, and estimation method.
-}
-}
+  \describe{
+    \item{\code{data}}{
+      A data frame of estimates for each offset value, with columns
+      matching \code{om_estimate_index()$estimates} plus an additional
+      column \code{Offset_M} identifying the applied offset in years.
+    }
+    \item{\code{meta}}{
+      A named list of metadata: variable name, offset range, standard
+      level, and estimation method.
+    }
+  }
 }
 \description{
 Evaluates the sensitivity of orphanhood-based mortality estimates to
@@ -37,7 +37,6 @@ assumptions about the mean age of childbearing (\eqn{M_n}) by
 re-estimating indices across a grid of additive offsets.
 }
 \examples{
-\dontrun{
   result <- om_estimate_index(
     method          = "luy",
     sex_parent      = "Female",
@@ -49,10 +48,9 @@ re-estimating indices across a grid of additive offsets.
   )
   sens <- om_sensitivity(result, range_m = seq(-2, 2, by = 0.5))
   plot(sens, index = "30q30")
-}
 
 }
 \seealso{
 \code{\link{plot.OrphanhoodSensitivity}},
-\code{\link{om_sensitivity_family}}, \code{\link{om_estimate_index}}
+  \code{\link{om_sensitivity_family}}, \code{\link{om_estimate_index}}
 }

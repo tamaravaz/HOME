@@ -45,75 +45,75 @@ Coale-Demeny families: \code{"West"}, \code{"North"}, \code{"East"},
 }
 \value{
 An object of class \code{OrphanhoodEstimate}, a named list with:
-\describe{
-\item{\code{estimates}}{
-Data frame of estimated adult mortality indices by respondent age
-group. Columns:
-\describe{
-\item{\code{Method}}{
-Citation label of the estimation method used.
-}
-\item{\code{RefYear}}{
-Estimated reference year of the mortality estimate, expressed
-as a decimal year.
-}
-\item{\code{Age}}{
-Lower bound of the respondent age group (\eqn{n}) used to
-derive the orphanhood estimate.
-}
-\item{\code{b}}{
-Initial exact age of the conditional survivorship interval.
-Equals 30 for Luy (2012); 25 for Timaeus (1992) females,
-35 for males; 25 for Brass (1973) females, 32.5 or 37.5
-for males depending on \eqn{\bar{M}}.
-}
-\item{\code{n_b}}{
-Terminal exact age of the survivorship interval
-(\eqn{b + \text{duration}}). For Luy (2012) this equals
-\eqn{33 + n}.
-}
-\item{\code{l(b)}}{
-Estimated survivorship at exact age \eqn{b}, derived from
-the relational logit model.
-}
-\item{\code{l(n_b)}}{
-Estimated survivorship at exact age \eqn{n\_b}, derived from
-the relational logit model.
-}
-\item{\code{lx_ratio}}{
-Conditional survivorship probability \eqn{l(n\_b) / l(b)},
-i.e.\ the probability of surviving from exact age \eqn{b}
-to exact age \eqn{n\_b}. This is the key observable quantity
-derived from the orphanhood method and used to estimate
-\code{Alpha}.
-}
-\item{\code{Alpha}}{
-Relational logit level parameter \eqn{\alpha} estimated by
-solving \eqn{l(n\_b) / l(b) = \text{lx\_ratio}} against the
-standard life table. Higher values indicate lower mortality.
-}
-\item{\code{30q30}}{
-Probability of dying between exact ages 30 and 60.
-}
-\item{\code{45q15}}{
-Probability of dying between exact ages 15 and 60.
-}
-\item{\code{e30}}{
-Life expectancy at exact age 30.
-}
-}
-}
-\item{\code{meta}}{
-Named list of metadata: sex of the parent, model life table family,
-family system type (\code{"UN"} or \code{"CD"}), method identifier,
-and primary index name.
-}
-\item{\code{inputs}}{
-Named list of the original input arguments, retained for
-reproducibility and use by \code{\link{om_sensitivity}} and
-\code{\link{om_sensitivity_family}}.
-}
-}
+  \describe{
+    \item{\code{estimates}}{
+      Data frame of estimated adult mortality indices by respondent age
+      group. Columns:
+      \describe{
+        \item{\code{Method}}{
+          Citation label of the estimation method used.
+        }
+        \item{\code{RefYear}}{
+          Estimated reference year of the mortality estimate, expressed
+          as a decimal year.
+        }
+        \item{\code{Age}}{
+          Lower bound of the respondent age group (\eqn{n}) used to
+          derive the orphanhood estimate.
+        }
+        \item{\code{b}}{
+          Initial exact age of the conditional survivorship interval.
+          Equals 30 for Luy (2012); 25 for Timaeus (1992) females,
+          35 for males; 25 for Brass and Hill (1973) females, 32.5 or 37.5
+          for males depending on \eqn{\bar{M}}.
+        }
+        \item{\code{n_b}}{
+          Terminal exact age of the survivorship interval
+          (\eqn{b + \text{duration}}). For Luy (2012) this equals
+          \eqn{33 + n}.
+        }
+        \item{\code{l(b)}}{
+          Estimated survivorship at exact age \eqn{b}, derived from
+          the relational logit model.
+        }
+        \item{\code{l(n_b)}}{
+          Estimated survivorship at exact age \eqn{n\_b}, derived from
+          the relational logit model.
+        }
+        \item{\code{lx_ratio}}{
+          Conditional survivorship probability \eqn{l(n\_b) / l(b)},
+          i.e.\ the probability of surviving from exact age \eqn{b}
+          to exact age \eqn{n\_b}. This is the key observable quantity
+          derived from the orphanhood method and used to estimate
+          \code{Alpha}.
+        }
+        \item{\code{Alpha}}{
+          Relational logit level parameter \eqn{\alpha} estimated by
+          solving \eqn{l(n\_b) / l(b) = \text{lx\_ratio}} against the
+          standard life table. Higher values indicate lower mortality.
+        }
+        \item{\code{30q30}}{
+          Probability of dying between exact ages 30 and 60.
+        }
+        \item{\code{45q15}}{
+          Probability of dying between exact ages 15 and 60.
+        }
+        \item{\code{e30}}{
+          Life expectancy at exact age 30.
+        }
+      }
+    }
+    \item{\code{meta}}{
+      Named list of metadata: sex of the parent, model life table family,
+      family system type (\code{"UN"} or \code{"CD"}), method identifier,
+      and primary index name.
+    }
+    \item{\code{inputs}}{
+      Named list of the original input arguments, retained for
+      reproducibility and use by \code{\link{om_sensitivity}} and
+      \code{\link{om_sensitivity_family}}.
+    }
+  }
 }
 \description{
 Estimates conditional survivorship probabilities using orphanhood methods
@@ -125,9 +125,9 @@ Three orphanhood-based estimation methods are supported. Regardless of the
 method selected, estimates are harmonized into three comparable mortality
 indices:
 \itemize{
-\item \strong{30q30}: Probability of dying between ages 30 and 60.
-\item \strong{45q15}: Probability of dying between ages 15 and 60.
-\item \strong{e30}: Life expectancy at age 30.
+  \item \strong{30q30}: Probability of dying between ages 30 and 60.
+  \item \strong{45q15}: Probability of dying between ages 15 and 60.
+  \item \strong{e30}: Life expectancy at age 30.
 }
 
 For the Brass method, adjacent orphanhood proportions are paired across
@@ -135,7 +135,6 @@ successive age groups. The first observation yields \code{NA} by
 construction because no preceding adjacent proportion exists.
 }
 \examples{
-\dontrun{
 result <- om_estimate_index(
   method          = "brass",
   sex_parent      = "Female",
@@ -146,10 +145,9 @@ result <- om_estimate_index(
   model_family    = "General"
 )
 print(result)
-}
 
 }
 \seealso{
 \code{\link{om_sensitivity}}, \code{\link{om_sensitivity_family}},
-\code{\link{om_plot_linearity}}
+  \code{\link{om_plot_linearity}}
 }

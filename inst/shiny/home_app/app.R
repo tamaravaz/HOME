@@ -1,25 +1,29 @@
 # ==============================================================================
-# HOME: Household-based Orphanhood Mortality Estimation
-# Shiny Application — inst/shiny/app.R
+# HOME: Harmonized Orphanhood Mortality Estimation
+# Shiny Application — inst/shiny/home_app/app.R
 #
 # This app provides an interactive interface for the HOME package functions.
-# Launch via: shiny::runApp(system.file("shiny", package = "HOME"))
 #
-# Dependencies (must be listed in DESCRIPTION Suggests field):
-#   shiny, bslib, ggplot2, plotly, DT, readxl, writexl
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
 # 0. Package Imports
 # ------------------------------------------------------------------------------
 
-library(shiny)
-library(bslib)
-library(ggplot2)
-library(plotly)
-library(DT)
-library(readxl)
-library(writexl)
+suppressPackageStartupMessages({
+  library(shiny)
+  library(bslib)
+  library(ggplot2)
+  library(plotly)
+  library(DT)
+  library(readxl)
+  library(writexl)
+})
+
+# Restore any functions masked by package conflicts so the app behaves
+# predictably regardless of the user's search path.
+filter <- stats::filter
+layout <- graphics::layout
 
 # ------------------------------------------------------------------------------
 # 1. Constants
@@ -27,7 +31,7 @@ library(writexl)
 
 .METHODS <- c(
   "Luy (2012)"     = "luy",
-  "Brass (1973)"   = "brass",
+  "Brass and Hill (1973)"   = "brass",
   "Timaeus (1992)" = "timaeus"
 )
 
@@ -67,7 +71,7 @@ library(writexl)
 # Source: European Union Agency for Fundamental Rights (2025).
 #   Rights of Roma and Travellers in 13 European Countries: Perspectives from
 #   the Roma Survey 2024. Publications Office of the EU.
-#   https://doi.org/10.2811/5671307
+#   https://doi.org/10.2811/9919091
 #
 # Column n:  lower bound of five-year respondent age group (e.g., 15 = age 15-19).
 # Column sn: proportion of respondents with mother reported alive.
@@ -351,9 +355,9 @@ ui <- bslib::page_sidebar(
             class = "py-3 px-3",
             shiny::radioButtons(
               "comp_metric", "Mortality indicator",
-              choices  = c("₃₀q₃₀ (Prob. dying 30\u201360)" = "30q30",
-                           "₄₅q₁₅ (Prob. dying 15\u201360)" = "45q15",
-                           "e₃₀ (Life expectancy at 30)"     = "e30"),
+              choices  = c("\u2083\u2080q\u2083\u2080 (Prob. dying 30\u201360)" = "30q30",
+                           "\u2084\u2085q\u2081\u2085 (Prob. dying 15\u201360)" = "45q15",
+                           "e\u2083\u2080 (Life expectancy at 30)"             = "e30"),
               selected = "30q30", inline = FALSE
             ),
             shiny::tags$hr(style = "margin: 8px 0;"),
@@ -559,7 +563,7 @@ server <- function(input, output, session) {
 
     if (!is.null(luy))     luy$MethodLabel     <- "Luy (2012)"
     if (!is.null(timaeus)) timaeus$MethodLabel  <- "Timaeus (1992)"
-    if (!is.null(brass))   brass$MethodLabel    <- "Brass (1973)"
+    if (!is.null(brass))   brass$MethodLabel    <- "Brass and Hill (1973)"
 
     do.call(rbind, Filter(Negate(is.null), list(luy, timaeus, brass)))
   })
@@ -616,15 +620,6 @@ server <- function(input, output, session) {
     ))
   })
 
-  # Render table for modal (also used by download)
-  output$table_comparison <- DT::renderDT({
-    shiny::req(r_comparison())
-    metric <- input$comp_metric
-    tab    <- r_comparison()[, c("MethodLabel", "Age", "RefYear", "Alpha", metric)]
-    names(tab) <- c("Method", "Age group", "RefYear", "Alpha", metric)
-    .comp_table_dt(tab, metric)
-  })
-
   # Comparison plot
   output$plot_comparison <- plotly::renderPlotly({
     shiny::req(r_comparison())
@@ -636,7 +631,7 @@ server <- function(input, output, session) {
     pal <- c(
       "Luy (2012)"     = "#003082",
       "Timaeus (1992)" = "#5A8FC2",
-      "Brass (1973)"   = "#F5C400"
+      "Brass and Hill (1973)"   = "#F5C400"
     )
 
     p <- ggplot2::ggplot(

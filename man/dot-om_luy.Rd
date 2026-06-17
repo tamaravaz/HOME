@@ -20,7 +20,7 @@ birth.}
 }
 \value{
 A data frame with columns \code{age_input}, \code{base_age},
-\code{target_age}, \code{prob}, and \code{ref_date}.
+  \code{target_age}, \code{prob}, and \code{ref_date}.
 }
 \description{
 Luy (2012) orphanhood estimation

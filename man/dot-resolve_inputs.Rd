@@ -14,7 +14,7 @@ calling function.}
 }
 \value{
 A named list of arguments suitable for passing to
-\code{\link{om_estimate_index}}.
+  \code{\link{om_estimate_index}}.
 }
 \description{
 Extracts estimation arguments from an existing \code{OrphanhoodEstimate}

@@ -9,9 +9,9 @@
 #' @details
 #' The Shiny application is located in \code{inst/shiny/home_app/} and is
 #' launched via \code{shiny::runApp()}. An active R session with the
-#' \pkg{shiny}, \pkg{bslib}, \pkg{plotly}, \pkg{DT}, \pkg{readxl}, and
-#' \pkg{writexl} packages is required; these are listed under \code{Suggests}
-#' in the package \code{DESCRIPTION} file.
+#' \pkg{shiny}, \pkg{bslib}, \pkg{ggplot2}, \pkg{plotly}, \pkg{DT},
+#' \pkg{readxl}, and \pkg{writexl} packages is required; these are listed
+#' under \code{Suggests} in the package \code{DESCRIPTION} file.
 #'
 #' @return This function is called for its side effect of launching a Shiny
 #'   application. It does not return a meaningful value; the return value of
@@ -21,12 +21,26 @@
 #'   function.
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()) {
 #'   app_HOME()
 #' }
 #'
 #' @export
 app_HOME <- function() {
+  needed  <- c("shiny", "bslib", "ggplot2", "plotly", "DT", "readxl", "writexl")
+  missing <- needed[!vapply(needed, requireNamespace, logical(1), quietly = TRUE)]
+
+  if (length(missing) > 0) {
+    stop(
+      "The following packages are required to launch the application: ",
+      paste(missing, collapse = ", "),
+      ".\nInstall them with install.packages(c(",
+      paste(sprintf('"%s"', missing), collapse = ", "),
+      ")).",
+      call. = FALSE
+    )
+  }
+
   app_dir <- system.file("shiny", "home_app", package = "HOME")
 
   if (!nzchar(app_dir)) {

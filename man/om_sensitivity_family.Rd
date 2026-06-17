@@ -25,18 +25,18 @@ overriding \code{type}.}
 }
 \value{
 An object of class \code{OrphanhoodSensitivityFamily}, a named list
-with:
-\describe{
-\item{\code{data}}{
-A data frame of estimates for each family, with columns matching
-\code{om_estimate_index()$estimates} plus an additional column
-\code{Family} identifying the model life table family.
-}
-\item{\code{meta}}{
-A named list of metadata: variable name, families tested, standard
-level, family system name, and estimation method.
-}
-}
+  with:
+  \describe{
+    \item{\code{data}}{
+      A data frame of estimates for each family, with columns matching
+      \code{om_estimate_index()$estimates} plus an additional column
+      \code{Family} identifying the model life table family.
+    }
+    \item{\code{meta}}{
+      A named list of metadata: variable name, families tested, standard
+      level, family system name, and estimation method.
+    }
+  }
 }
 \description{
 Evaluates the sensitivity of orphanhood-based mortality estimates to the
@@ -44,7 +44,6 @@ assumed age pattern of mortality by re-estimating indices across multiple
 model life table families.
 }
 \examples{
-\dontrun{
   result <- om_estimate_index(
     method          = "luy",
     sex_parent      = "Female",
@@ -56,10 +55,9 @@ model life table families.
   )
   sens_fam <- om_sensitivity_family(result, type = "UN")
   plot(sens_fam, index = "30q30")
-}
 
 }
 \seealso{
 \code{\link{plot.OrphanhoodSensitivityFamily}},
-\code{\link{om_sensitivity}}, \code{\link{om_estimate_index}}
+  \code{\link{om_sensitivity}}, \code{\link{om_estimate_index}}
 }

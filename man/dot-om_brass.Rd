@@ -2,7 +2,7 @@
 % Please edit documentation in R/om_estimators.R
 \name{.om_brass}
 \alias{.om_brass}
-\title{Brass (1973) / Hill orphanhood estimation}
+\title{Brass and Hill (1973) orphanhood estimation}
 \usage{
 .om_brass(sex, age, sn, mn, date, sn_10 = NULL, n_resp = NULL)
 }
@@ -27,10 +27,10 @@ row returns \code{NA} by construction.}
 }
 \value{
 A data frame with columns \code{age_input}, \code{base_age},
-\code{target_age}, \code{prob}, and \code{ref_date}.
+  \code{target_age}, \code{prob}, and \code{ref_date}.
 }
 \description{
-Brass (1973) / Hill orphanhood estimation
+Brass and Hill (1973) orphanhood estimation
 }
 \details{
 Implements UN Manual X equations B.4--B.8. Conditional survivorship is

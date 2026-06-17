@@ -58,7 +58,7 @@
 #'         \item{\code{b}}{
 #'           Initial exact age of the conditional survivorship interval.
 #'           Equals 30 for Luy (2012); 25 for Timaeus (1992) females,
-#'           35 for males; 25 for Brass (1973) females, 32.5 or 37.5
+#'           35 for males; 25 for Brass and Hill (1973) females, 32.5 or 37.5
 #'           for males depending on \eqn{\bar{M}}.
 #'         }
 #'         \item{\code{n_b}}{
@@ -113,7 +113,6 @@
 #'   \code{\link{om_plot_linearity}}
 #'
 #' @examples
-#' \dontrun{
 #' result <- om_estimate_index(
 #'   method          = "brass",
 #'   sex_parent      = "Female",
@@ -124,7 +123,6 @@
 #'   model_family    = "General"
 #' )
 #' print(result)
-#' }
 #'
 #' @export
 om_estimate_index <- function(method          = c("luy", "timaeus", "brass"),
@@ -158,7 +156,7 @@ om_estimate_index <- function(method          = c("luy", "timaeus", "brass"),
                             mean_age_parent, surv_date)
 
   } else {
-    citation <- "Brass (1973)"
+    citation <- "Brass and Hill (1973)"
     raw      <- .om_brass(
       sex    = sex_parent,
       age    = age_respondent,
@@ -557,7 +555,7 @@ summary.OrphanhoodEstimate <- function(object, ...) {
 }
 
 
-#' Brass (1973) / Hill orphanhood estimation
+#' Brass and Hill (1973) orphanhood estimation
 #'
 #' @inheritParams .om_luy
 #' @param sn_10 Numeric. Optional proportion with parent alive for the age

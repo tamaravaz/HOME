@@ -1,0 +1,252 @@
+---
+title: "Getting Started with HOME"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with HOME}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width  = 7,
+  fig.height = 4
+)
+```
+
+## Overview
+
+The **HOME** package implements three established orphanhood-based methods for
+indirect adult mortality estimation from survey data:
+
+- **Brass and Hill (1973)** — the original weighting-factor approach
+- **Timaeus (1992)** — a regression-based refinement
+- **Luy (2012)** — recalibrated for low- and moderate-mortality populations
+
+All three methods share a common estimation pipeline: orphanhood proportions
+$S(n)$ are converted to conditional survivorship ratios and then mapped,
+via a one-parameter relational logit model, onto three comparable mortality
+indices: $_{30}q_{30}$, $_{45}q_{15}$, and $e_{30}$.
+
+Beyond point estimation, HOME provides diagnostic tools for assessing internal
+consistency and quantifying sensitivity to key structural assumptions.
+
+## Installation
+
+```r
+install.packages("HOME")
+```
+
+For the interactive Shiny dashboard, install the suggested dependencies:
+
+```r
+install.packages("HOME", dependencies = TRUE)
+```
+
+## Input data
+
+The core function `om_estimate_index()` requires four inputs per respondent
+age group:
+
+| Argument         | Description                                              |
+|------------------|----------------------------------------------------------|
+| `age_respondent` | Lower bound of each five-year age group (e.g. 20, 25, …)|
+| `p_surv`         | Proportion of respondents reporting the parent alive     |
+| `mean_age_parent`| Mean age of parents at respondent's birth ($\bar{M}$)   |
+| `surv_date`      | Survey reference date as a decimal year                  |
+
+The example below uses synthetic data for illustration:
+
+```{r data}
+library(HOME)
+
+age  <- seq(20, 60, by = 5)
+sn   <- c(0.987, 0.967, 0.934, 0.908, 0.882, 0.835, 0.769, 0.669, 0.565)
+mn   <- rep(27, 9)
+date <- 1998.5
+```
+
+## Core estimation
+
+Pass these inputs to `om_estimate_index()`, selecting a method and the sex
+of the parent:
+
+```{r estimate}
+result <- om_estimate_index(
+  method          = "luy",
+  sex_parent      = "Female",
+  age_respondent  = age,
+  p_surv          = sn,
+  mean_age_parent = mn,
+  surv_date       = date,
+  model_family    = "General"
+)
+```
+
+`print()` displays the full results table:
+
+```{r print}
+print(result)
+```
+
+`summary()` reports the range and central tendency of the primary index:
+
+```{r summary}
+summary(result)
+```
+
+The returned object is of class `OrphanhoodEstimate` and contains three
+elements:
+
+- `$estimates` — a data frame with one row per respondent age group, including
+  the survivorship ratio (`lx_ratio`), the reference date (`RefYear`), the
+  Brass logit level (`Alpha`), and the three indices `30q30`, `45q15`, `e30`
+- `$meta` — method, sex, and model family metadata
+- `$inputs` — the original arguments, retained for use by diagnostic functions
+
+## Comparing methods
+
+Apply all three methods to the same data to make methodological differences
+visible:
+
+```{r compare}
+luy     <- om_estimate_index("luy",     "Female", age, sn, mn, date)
+brass   <- om_estimate_index("brass",   "Female", age, sn, mn, date)
+timaeus <- om_estimate_index("timaeus", "Female", age, sn, mn, date)
+```
+
+```{r compare-plot, fig.height=3.5}
+library(ggplot2)
+
+methods <- list(
+  "Luy (2012)"           = luy,
+  "Brass and Hill (1973)"= brass,
+  "Timaeus (1992)"       = timaeus
+)
+cols <- c(
+  "Luy (2012)"            = "#003082",
+  "Brass and Hill (1973)" = "#E09B00",
+  "Timaeus (1992)"        = "#5A8FC2"
+)
+
+df <- do.call(rbind, lapply(names(methods), function(nm) {
+  d <- methods[[nm]]$estimates
+  d$Method <- nm
+  d
+}))
+df <- df[!is.na(df$RefYear) & !is.na(df[["30q30"]]), ]
+
+ggplot(df, aes(x = RefYear, y = `30q30`, colour = Method, group = Method)) +
+  geom_line(linewidth = 0.7) +
+  geom_point(size = 1.5, alpha = 0.6) +
+  scale_colour_manual(values = cols, name = NULL) +
+  labs(x = "Reference year", y = expression({}[30]*q[30])) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+## Internal consistency diagnostic
+
+The Brass logit level parameter $\alpha_n$ should vary smoothly across
+respondent age groups if the model is well-specified. `om_plot_linearity()`
+visualises this sequence:
+
+```{r linearity, fig.height=3}
+om_plot_linearity(luy)
+```
+
+A roughly flat or smoothly trending line indicates consistency. Sharp jumps
+may signal age-reporting errors, adoption effects, or genuine period shocks
+to mortality.
+
+## Sensitivity to mean age at childbearing
+
+The mean age at childbearing $\bar{M}$ governs how survivorship ratios are
+located in calendar time. When this parameter is uncertain, `om_sensitivity()`
+re-estimates all indices across a grid of additive offsets $\delta$:
+
+```{r sens-m}
+sens_m <- om_sensitivity(luy, range_m = seq(-2, 2, by = 0.5))
+print(sens_m)
+summary(sens_m, index = "30q30")
+```
+
+```{r sens-m-plot, fig.height=3.5}
+plot(sens_m, index = "30q30")
+```
+
+Lines run from light grey (most negative offset) to black (most positive).
+Narrow bands indicate low sensitivity; wide bands indicate that the estimates
+depend substantially on the assumed fertility timing.
+
+## Sensitivity to model life table family
+
+The choice of model life table family fixes the assumed age pattern of
+mortality. `om_sensitivity_family()` repeats the estimation across all
+families in a given system:
+
+```{r sens-fam}
+sens_fam <- om_sensitivity_family(luy, type = "UN")
+print(sens_fam)
+summary(sens_fam, index = "30q30")
+```
+
+```{r sens-fam-plot, fig.height=3.5}
+plot(sens_fam, index = "30q30")
+```
+
+## Combined diagnostic dashboard
+
+`om_dashboard()` arranges the internal consistency plot and both sensitivity
+analyses into a single three-panel display:
+
+```{r dashboard, fig.height=6, fig.width=7}
+om_dashboard(luy, index = "30q30", family_type = "UN")
+```
+
+## Interactive application
+
+An interactive Shiny dashboard is available for users who prefer a graphical
+interface. It exposes the same estimation and diagnostic pipeline, accepts
+user-uploaded data (`.csv` or `.xlsx`), and allows real-time exploration of
+sensitivity assumptions:
+
+```r
+app_HOME()
+```
+
+The application requires the suggested packages `shiny`, `bslib`, `plotly`,
+`DT`, `readxl`, and `writexl`.
+
+## Model life table families
+
+The `model_family` argument accepts nine values across two systems:
+
+**UN regional families** (Coale and Demeny extended):
+`"General"`, `"Latin"`, `"Chilean"`, `"South_Asian"`, `"Far_East_Asian"`
+
+**Coale-Demeny families**:
+`"West"`, `"North"`, `"East"`, `"South"`
+
+The default is `"General"`. When the true age pattern of mortality for the
+target population is unknown, comparing estimates across families via
+`om_sensitivity_family()` is recommended.
+
+## References
+
+Brass, W. and Hill, K. H. (1973). Estimating adult mortality from orphanhood.
+In *Proceedings of the International Population Conference, Liège 1973*,
+Vol. 3, pp. 111–123. IUSSP.
+
+Luy, M. (2012). Estimating mortality differences in developed countries from
+survey information on maternal and paternal orphanhood. *Demography*, 49(2),
+607–627. <https://doi.org/10.1007/s13524-012-0101-4>
+
+Timaeus, I. M. (1992). Estimation of adult mortality from paternal orphanhood:
+a reassessment and a new approach. *Population Bulletin of the United Nations*,
+33, 47–63.
+
+United Nations (1983). *Manual X: Indirect Techniques for Demographic
+Estimation*. ST/ESA/SER.A/81. New York: United Nations.
