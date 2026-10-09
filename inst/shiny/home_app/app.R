@@ -515,14 +515,14 @@ server <- function(input, output, session) {
                   "Offset minimum must be less than maximum.")
     )
     range_m <- seq(input$sens_mn_min, input$sens_mn_max, by = 0.5)
-    sens    <- HOME::om_sensitivity(r_estimates(), range_m = range_m)
+    sens    <- HOME::om_sensitivity_Mn(r_estimates(), range_m = range_m)
     p <- tryCatch(plot(sens, index = input$diag_metric), error = function(e) plot(sens))
     print(p)
   })
 
   output$plot_sens_family <- shiny::renderPlot({
     shiny::req(r_estimates(), input$sens_fam_type, input$diag_metric)
-    sens_fam <- HOME::om_sensitivity_family(r_estimates(), type = input$sens_fam_type)
+    sens_fam <- HOME::om_sensitivity_modelLT(r_estimates(), type = input$sens_fam_type)
     p <- tryCatch(plot(sens_fam, index = input$diag_metric), error = function(e) plot(sens_fam))
     print(p)
   })

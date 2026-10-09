@@ -164,11 +164,11 @@ to mortality.
 ## Sensitivity to mean age at childbearing
 
 The mean age at childbearing $\bar{M}$ governs how survivorship ratios are
-located in calendar time. When this parameter is uncertain, `om_sensitivity()`
+located in calendar time. When this parameter is uncertain, `om_sensitivity_Mn()`
 re-estimates all indices across a grid of additive offsets $\delta$:
 
 ```{r sens-m}
-sens_m <- om_sensitivity(luy, range_m = seq(-2, 2, by = 0.5))
+sens_m <- om_sensitivity_Mn(luy, range_m = seq(-2, 2, by = 0.5))
 print(sens_m)
 summary(sens_m, index = "30q30")
 ```
@@ -184,11 +184,11 @@ depend substantially on the assumed fertility timing.
 ## Sensitivity to model life table family
 
 The choice of model life table family fixes the assumed age pattern of
-mortality. `om_sensitivity_family()` repeats the estimation across all
+mortality. `om_sensitivity_modelLT()` repeats the estimation across all
 families in a given system:
 
 ```{r sens-fam}
-sens_fam <- om_sensitivity_family(luy, type = "UN")
+sens_fam <- om_sensitivity_modelLT(luy, type = "UN")
 print(sens_fam)
 summary(sens_fam, index = "30q30")
 ```
@@ -232,7 +232,7 @@ The `model_family` argument accepts nine values across two systems:
 
 The default is `"General"`. When the true age pattern of mortality for the
 target population is unknown, comparing estimates across families via
-`om_sensitivity_family()` is recommended.
+`om_sensitivity_modelLT()` is recommended.
 
 ## References
 

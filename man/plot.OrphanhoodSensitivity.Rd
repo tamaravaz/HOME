@@ -23,5 +23,5 @@ mean-age-of-childbearing offset, coloured from light (low offset) to
 dark (high offset).
 }
 \seealso{
-\code{\link{om_sensitivity}}
+\code{\link{om_sensitivity_Mn}}
 }

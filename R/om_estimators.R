@@ -37,6 +37,23 @@
 #'   \code{"Chilean"}, \code{"South_Asian"}, \code{"Far_East_Asian"}.
 #'   Coale-Demeny families: \code{"West"}, \code{"North"}, \code{"East"},
 #'   \code{"South"}. Default is \code{"General"}.
+#' @param e0 Numeric. Life expectancy at birth (\eqn{e_0}) level identifying
+#'   which mortality level of the chosen \code{model_family} to use as the
+#'   relational logit standard. Must match one of the levels bundled in the
+#'   package's internal model life table database (currently \code{60},
+#'   \code{70}, \code{80}, \code{90}, or \code{100}). Default is \code{60},
+#'   matching the package's previous fixed behaviour. Lower levels represent
+#'   higher-mortality standards; choose a level close to the expected
+#'   mortality of the population under analysis.
+#' @param custom_coef_luy Optional. A named list containing at least the
+#'   element matching \code{sex_parent} (\code{"Female"} or \code{"Male"}),
+#'   itself a list with data frames \code{wn}, \code{an}, and \code{bn} in
+#'   the same format as the package's built-in Luy (2012) coefficients (see
+#'   \code{\link{sysdata}}). When supplied and \code{method = "luy"}, these
+#'   coefficients replace the package's default Italy-calibrated tables for
+#'   the sex being estimated. Use \code{\link{om_calibrate_luy}} to derive
+#'   such a set from historical fertility and cohort mortality data for a
+#'   population other than Italy.
 #'
 #' @return An object of class \code{OrphanhoodEstimate}, a named list with:
 #'   \describe{
@@ -104,13 +121,34 @@
 #'     }
 #'     \item{\code{inputs}}{
 #'       Named list of the original input arguments, retained for
-#'       reproducibility and use by \code{\link{om_sensitivity}} and
-#'       \code{\link{om_sensitivity_family}}.
+#'       reproducibility and use by \code{\link{om_sensitivity_Mn}} and
+#'       \code{\link{om_sensitivity_modelLT}}.
 #'     }
 #'   }
 #'
-#' @seealso \code{\link{om_sensitivity}}, \code{\link{om_sensitivity_family}},
-#'   \code{\link{om_plot_linearity}}
+#' @references
+#' Brass, W. and Hill, K. H. (1973). Estimating adult mortality from
+#' orphanhood. In \emph{Proceedings of the International Population
+#' Conference, Liege 1973}, Vol. 3, pp. 111--123. IUSSP.
+#'
+#' Luy, M. (2009). Estimating mortality differentials in developed
+#' populations from survey information on maternal and paternal orphanhood.
+#' \emph{European Demographic Research Papers} 2009-3. Vienna Institute of
+#' Demography.
+#'
+#' Luy, M. (2012). Estimating mortality differences in developed countries
+#' from survey information on maternal and paternal orphanhood.
+#' \emph{Demography}, 49(2), 607--627. \doi{10.1007/s13524-012-0101-4}
+#'
+#' Timaeus, I. M. (1992). Estimation of adult mortality from paternal
+#' orphanhood: a reassessment and a new approach. \emph{Population Bulletin
+#' of the United Nations}, 33, 47--63.
+#'
+#' United Nations (1983). \emph{Manual X: Indirect Techniques for
+#' Demographic Estimation}. New York: United Nations.
+#'
+#' @seealso \code{\link{om_sensitivity_Mn}}, \code{\link{om_sensitivity_modelLT}},
+#'   \code{\link{om_plot_linearity}}, \code{\link{om_calibrate_luy}}
 #'
 #' @examples
 #' result <- om_estimate_index(
@@ -132,23 +170,53 @@ om_estimate_index <- function(method          = c("luy", "timaeus", "brass"),
                               mean_age_parent,
                               surv_date,
                               num_respondents = NULL,
-                              model_family    = "General") {
+                              model_family    = "General",
+                              e0              = 60,
+                              custom_coef_luy = NULL) {
 
   method     <- match.arg(method)
   sex_parent <- match.arg(sex_parent)
 
+  if (length(p_surv) != length(age_respondent)) {
+    stop("'p_surv' must have one value per element of 'age_respondent'.",
+         call. = FALSE)
+  }
+  if (length(mean_age_parent) == 1L) {
+    mean_age_parent <- rep(mean_age_parent, length(age_respondent))
+  } else if (length(mean_age_parent) != length(age_respondent)) {
+    stop("'mean_age_parent' must be a single value or one value per ",
+         "element of 'age_respondent'.", call. = FALSE)
+  }
   if (!is.null(num_respondents) &&
       length(num_respondents) != length(age_respondent)) {
     stop("Length of 'num_respondents' must match 'age_respondent'.",
          call. = FALSE)
   }
 
+  if (!is.null(custom_coef_luy)) {
+    required_sub <- c("wn", "an", "bn")
+    if (!is.list(custom_coef_luy) || !sex_parent %in% names(custom_coef_luy) ||
+        is.null(custom_coef_luy[[sex_parent]])) {
+      stop(sprintf(
+        "'custom_coef_luy' must contain an element '%s' (matching 'sex_parent'). See om_calibrate_luy() to derive a valid set.",
+        sex_parent), call. = FALSE)
+    }
+    if (!is.list(custom_coef_luy[[sex_parent]]) ||
+        !all(required_sub %in% names(custom_coef_luy[[sex_parent]]))) {
+      stop(sprintf(
+        "'custom_coef_luy$%s' must contain data frames 'wn', 'an', 'bn'.",
+        sex_parent), call. = FALSE)
+    }
+  }
+
   # --- 1. Dispatch to method-specific internal function -------------------
 
   if (method == "luy") {
-    citation <- "Luy (2012)"
-    raw      <- .om_luy(sex_parent, age_respondent, p_surv,
-                        mean_age_parent, surv_date)
+    citation    <- "Luy (2012)"
+    coef_source <- if (is.null(custom_coef_luy)) coef_luy else custom_coef_luy
+    raw         <- .om_luy(sex_parent, age_respondent, p_surv,
+                           mean_age_parent, surv_date,
+                           coef_luy_override = coef_source)
 
   } else if (method == "timaeus") {
     citation <- "Timaeus (1992)"
@@ -185,16 +253,25 @@ om_estimate_index <- function(method          = c("luy", "timaeus", "brass"),
          call. = FALSE)
   }
 
+  available_e0 <- sort(unique(std_data$E0))
+
+  if (!e0 %in% available_e0) {
+    stop(sprintf(
+      "'e0' = %s is not available. Choose one of: %s.",
+      e0, paste(available_e0, collapse = ", ")),
+      call. = FALSE)
+  }
+
   std <- std_data[
     std_data$Sex      == sex_parent    &
       std_data$Family   == model_family  &
       std_data$Type_MLT == selected_type &
-      std_data$E0       == 60, ]
+      std_data$E0       == e0, ]
 
   if (nrow(std) == 0L) {
     stop(sprintf(
-      "Standard life table not found for Family = '%s', Sex = '%s'.",
-      model_family, sex_parent),
+      "Standard life table not found for Family = '%s', Sex = '%s', e0 = %s.",
+      model_family, sex_parent, e0),
       call. = FALSE)
   }
 
@@ -319,6 +396,7 @@ om_estimate_index <- function(method          = c("luy", "timaeus", "brass"),
       sex        = sex_parent,
       family     = model_family,
       type       = selected_type,
+      e0         = e0,
       method_id  = method,
       index_name = "30q30"
     ),
@@ -330,7 +408,9 @@ om_estimate_index <- function(method          = c("luy", "timaeus", "brass"),
       mean_age_parent = mean_age_parent,
       surv_date       = surv_date,
       num_respondents = num_respondents,
-      model_family    = model_family
+      model_family    = model_family,
+      e0              = e0,
+      custom_coef_luy = custom_coef_luy
     )
   )
 
@@ -426,13 +506,17 @@ summary.OrphanhoodEstimate <- function(object, ...) {
 #' @param mn Numeric scalar or vector. Mean age of parents at respondent's
 #'   birth.
 #' @param date Numeric. Survey reference date as a decimal year.
+#' @param coef_luy_override Optional. A named list with elements
+#'   \code{"Female"}/\code{"Male"} (each with data frames \code{wn}, \code{an},
+#'   \code{bn}) used in place of the package's built-in Luy (2012)
+#'   coefficients. Defaults to the package's internal \code{coef_luy} object.
 #'
 #' @return A data frame with columns \code{age_input}, \code{base_age},
 #'   \code{target_age}, \code{prob}, and \code{ref_date}.
 #'
 #' @keywords internal
-.om_luy <- function(sex, age, sn, mn, date) {
-  coef_set <- coef_luy[[sex]]
+.om_luy <- function(sex, age, sn, mn, date, coef_luy_override = coef_luy) {
+  coef_set <- coef_luy_override[[sex]]
   out_list <- vector("list", length(age))
 
   for (i in seq_along(age)) {

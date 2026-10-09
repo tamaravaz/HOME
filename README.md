@@ -47,15 +47,36 @@ est <- om_estimate_index(
 # Plots the logit-transformed residuals (Alpha) across age groups
 om_plot_linearity(est)
 # Re-runs the model with perturbed M values
-sens_m <- om_sensitivity(est, range_m = seq(-1.5, 1.5, 0.5))
+sens_m <- om_sensitivity_Mn(est, range_m = seq(-1.5, 1.5, 0.5))
 plot(sens_m, index = "e30")
 
 # Re-runs the model using all UN families (General, South Asian, etc.)
-sens_fam <- om_sensitivity_family(est, type = "UN")
+sens_fam <- om_sensitivity_modelLT(est, type = "UN")
 plot(sens_fam, index = "30q30")
 
 # Generates a composite view of linearity and sensitivity
 om_dashboard(est, index = "e30", family_type = "UN")
+```
+
+## Calibrating Luy's coefficients for another population
+
+The built-in Luy coefficients were derived for Italy. `om_calibrate_luy()`
+derives W(n), a(n), b(n) and the mean-age conversion table from your own
+data, following Luy (2009). You prepare four data frames in long format
+(`asfr`: age, year, rate; `cohort_qx`: age, cohort, qx; `pop_age`: age,
+year, n; `period_lx`: year, age, lx):
+
+```r
+om_luy_data_needs(2003.9, "Female")          # years, ages and cohorts needed
+om_luy_validate_inputs(asfr, cohort_qx, pop_age, period_lx,
+                       survey_date = 2003.9, sex_parent = "Female")
+cal <- om_calibrate_luy("Female", asfr = asfr, cohort_qx = cohort_qx,
+                        pop_age = pop_age, period_lx = period_lx,
+                        survey_date = 2003.9)
+est <- om_estimate_index(method = "luy", sex_parent = "Female",
+                         age_respondent = df_input$age_n,
+                         p_surv = df_input$Sn, mean_age_parent = df_input$Mn,
+                         surv_date = 2024.75, custom_coef_luy = cal)
 ```
 
 ## Interactive Dashboard

@@ -4,7 +4,7 @@
 \alias{.om_luy}
 \title{Luy (2012) orphanhood estimation}
 \usage{
-.om_luy(sex, age, sn, mn, date)
+.om_luy(sex, age, sn, mn, date, coef_luy_override = coef_luy)
 }
 \arguments{
 \item{sex}{Character. \code{"Female"} or \code{"Male"}.}
@@ -17,6 +17,11 @@
 birth.}
 
 \item{date}{Numeric. Survey reference date as a decimal year.}
+
+\item{coef_luy_override}{Optional. A named list with elements
+\code{"Female"}/\code{"Male"} (each with data frames \code{wn}, \code{an},
+\code{bn}) used in place of the package's built-in Luy (2012)
+coefficients. Defaults to the package's internal \code{coef_luy} object.}
 }
 \value{
 A data frame with columns \code{age_input}, \code{base_age},

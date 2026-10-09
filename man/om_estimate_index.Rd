@@ -12,7 +12,9 @@ om_estimate_index(
   mean_age_parent,
   surv_date,
   num_respondents = NULL,
-  model_family = "General"
+  model_family = "General",
+  e0 = 60,
+  custom_coef_luy = NULL
 )
 }
 \arguments{
@@ -42,6 +44,25 @@ logit standard. UN families: \code{"General"}, \code{"Latin"},
 \code{"Chilean"}, \code{"South_Asian"}, \code{"Far_East_Asian"}.
 Coale-Demeny families: \code{"West"}, \code{"North"}, \code{"East"},
 \code{"South"}. Default is \code{"General"}.}
+
+\item{e0}{Numeric. Life expectancy at birth (\eqn{e_0}) level identifying
+which mortality level of the chosen \code{model_family} to use as the
+relational logit standard. Must match one of the levels bundled in the
+package's internal model life table database (currently \code{60},
+\code{70}, \code{80}, \code{90}, or \code{100}). Default is \code{60},
+matching the package's previous fixed behaviour. Lower levels represent
+higher-mortality standards; choose a level close to the expected
+mortality of the population under analysis.}
+
+\item{custom_coef_luy}{Optional. A named list containing at least the
+element matching \code{sex_parent} (\code{"Female"} or \code{"Male"}),
+itself a list with data frames \code{wn}, \code{an}, and \code{bn} in
+the same format as the package's built-in Luy (2012) coefficients (see
+\code{\link{sysdata}}). When supplied and \code{method = "luy"}, these
+coefficients replace the package's default Italy-calibrated tables for
+the sex being estimated. Use \code{\link{om_calibrate_luy}} to derive
+such a set from historical fertility and cohort mortality data for a
+population other than Italy.}
 }
 \value{
 An object of class \code{OrphanhoodEstimate}, a named list with:
@@ -110,8 +131,8 @@ An object of class \code{OrphanhoodEstimate}, a named list with:
     }
     \item{\code{inputs}}{
       Named list of the original input arguments, retained for
-      reproducibility and use by \code{\link{om_sensitivity}} and
-      \code{\link{om_sensitivity_family}}.
+      reproducibility and use by \code{\link{om_sensitivity_Mn}} and
+      \code{\link{om_sensitivity_modelLT}}.
     }
   }
 }
@@ -147,7 +168,28 @@ result <- om_estimate_index(
 print(result)
 
 }
+\references{
+Brass, W. and Hill, K. H. (1973). Estimating adult mortality from
+orphanhood. In \emph{Proceedings of the International Population
+Conference, Liege 1973}, Vol. 3, pp. 111--123. IUSSP.
+
+Luy, M. (2009). Estimating mortality differentials in developed
+populations from survey information on maternal and paternal orphanhood.
+\emph{European Demographic Research Papers} 2009-3. Vienna Institute of
+Demography.
+
+Luy, M. (2012). Estimating mortality differences in developed countries
+from survey information on maternal and paternal orphanhood.
+\emph{Demography}, 49(2), 607--627. \doi{10.1007/s13524-012-0101-4}
+
+Timaeus, I. M. (1992). Estimation of adult mortality from paternal
+orphanhood: a reassessment and a new approach. \emph{Population Bulletin
+of the United Nations}, 33, 47--63.
+
+United Nations (1983). \emph{Manual X: Indirect Techniques for
+Demographic Estimation}. New York: United Nations.
+}
 \seealso{
-\code{\link{om_sensitivity}}, \code{\link{om_sensitivity_family}},
-  \code{\link{om_plot_linearity}}
+\code{\link{om_sensitivity_Mn}}, \code{\link{om_sensitivity_modelLT}},
+  \code{\link{om_plot_linearity}}, \code{\link{om_calibrate_luy}}
 }

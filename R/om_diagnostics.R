@@ -76,7 +76,7 @@ utils::globalVariables(c(
 #'   }
 #'
 #' @seealso \code{\link{plot.OrphanhoodSensitivity}},
-#'   \code{\link{om_sensitivity_family}}, \code{\link{om_estimate_index}}
+#'   \code{\link{om_sensitivity_modelLT}}, \code{\link{om_estimate_index}}
 #'
 #' @examples
 #'   result <- om_estimate_index(
@@ -88,13 +88,13 @@ utils::globalVariables(c(
 #'     mean_age_parent = rep(27, 9),
 #'     surv_date       = 1998.5
 #'   )
-#'   sens <- om_sensitivity(result, range_m = seq(-2, 2, by = 0.5))
+#'   sens <- om_sensitivity_Mn(result, range_m = seq(-2, 2, by = 0.5))
 #'   plot(sens, index = "30q30")
 #'
 #' @export
-om_sensitivity <- function(object  = NULL,
-                           range_m = seq(-1.5, 1.5, 0.5),
-                           ...) {
+om_sensitivity_Mn <- function(object  = NULL,
+                              range_m = seq(-1.5, 1.5, 0.5),
+                              ...) {
   raw_args <- list(...)
   args     <- .resolve_inputs(object, raw_args)
 
@@ -151,7 +151,7 @@ om_sensitivity <- function(object  = NULL,
 #'
 #' @return A \code{ggplot} object.
 #'
-#' @seealso \code{\link{om_sensitivity}}
+#' @seealso \code{\link{om_sensitivity_Mn}}
 #'
 #' @export
 plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
@@ -229,7 +229,7 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
 #'   }
 #'
 #' @seealso \code{\link{plot.OrphanhoodSensitivityFamily}},
-#'   \code{\link{om_sensitivity}}, \code{\link{om_estimate_index}}
+#'   \code{\link{om_sensitivity_Mn}}, \code{\link{om_estimate_index}}
 #'
 #' @examples
 #'   result <- om_estimate_index(
@@ -241,14 +241,14 @@ plot.OrphanhoodSensitivity <- function(x, index = "30q30", ...) {
 #'     mean_age_parent = rep(27, 9),
 #'     surv_date       = 1998.5
 #'   )
-#'   sens_fam <- om_sensitivity_family(result, type = "UN")
+#'   sens_fam <- om_sensitivity_modelLT(result, type = "UN")
 #'   plot(sens_fam, index = "30q30")
 #'
 #' @export
-om_sensitivity_family <- function(object   = NULL,
-                                  type     = c("UN", "CD", "All"),
-                                  families = NULL,
-                                  ...) {
+om_sensitivity_modelLT <- function(object   = NULL,
+                                   type     = c("UN", "CD", "All"),
+                                   families = NULL,
+                                   ...) {
   raw_args <- list(...)
   args     <- .resolve_inputs(object, raw_args)
 
@@ -317,7 +317,7 @@ om_sensitivity_family <- function(object   = NULL,
 #'
 #' @return A \code{ggplot} object.
 #'
-#' @seealso \code{\link{om_sensitivity_family}}
+#' @seealso \code{\link{om_sensitivity_modelLT}}
 #'
 #' @export
 plot.OrphanhoodSensitivityFamily <- function(x, index = "30q30", ...) {
@@ -436,8 +436,8 @@ om_plot_linearity <- function(object) {
 #'   \code{gridExtra::grid.arrange()}.
 #'
 #' @seealso \code{\link{om_plot_linearity}},
-#'   \code{\link{om_sensitivity}},
-#'   \code{\link{om_sensitivity_family}}
+#'   \code{\link{om_sensitivity_Mn}},
+#'   \code{\link{om_sensitivity_modelLT}}
 #'
 #' @examples
 #' result <- om_estimate_index(
@@ -462,8 +462,8 @@ om_dashboard <- function(object,
     stop("'object' must be of class 'OrphanhoodEstimate'.", call. = FALSE)
   }
 
-  sens_m   <- om_sensitivity(object, range_m = range_m)
-  sens_fam <- om_sensitivity_family(object, type = family_type)
+  sens_m   <- om_sensitivity_Mn(object, range_m = range_m)
+  sens_fam <- om_sensitivity_modelLT(object, type = family_type)
 
   p1 <- om_plot_linearity(object)
   p2 <- plot(sens_m,   index = index)

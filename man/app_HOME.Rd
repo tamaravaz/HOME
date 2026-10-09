@@ -15,8 +15,8 @@ This function is called for its side effect of launching a Shiny
 Opens the interactive dashboard for indirect adult mortality estimation
 using the orphanhood-based methods implemented in the \pkg{HOME} package.
 The application provides a graphical interface to \code{\link{om_estimate_index}},
-\code{\link{om_plot_linearity}}, \code{\link{om_sensitivity}}, and
-\code{\link{om_sensitivity_family}}.
+\code{\link{om_plot_linearity}}, \code{\link{om_sensitivity_Mn}}, and
+\code{\link{om_sensitivity_modelLT}}.
 }
 \details{
 The Shiny application is located in \code{inst/shiny/home_app/} and is

@@ -50,6 +50,6 @@ om_dashboard(result, index = "30q30", family_type = "UN")
 }
 \seealso{
 \code{\link{om_plot_linearity}},
-  \code{\link{om_sensitivity}},
-  \code{\link{om_sensitivity_family}}
+  \code{\link{om_sensitivity_Mn}},
+  \code{\link{om_sensitivity_modelLT}}
 }

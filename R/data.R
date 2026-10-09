@@ -7,10 +7,6 @@
 # The following five objects are stored in R/sysdata.rda. They are loaded
 # automatically when the package is attached and are accessible only to
 # internal package functions (they are not exported to users).
-#
-# Source code for constructing these objects from primary references is
-# provided in data-raw/ in the package source repository at
-# <https://github.com/tamaravaz/HOME>.
 
 #' @name sysdata
 #' @title Internal coefficient and life table datasets
@@ -47,9 +43,10 @@
 #'   \item{\code{mlt_un_data}}{
 #'     An abridged model life table database containing both UN regional
 #'     families (General, Latin, Chilean, South Asian, Far East Asian) and
-#'     Coale-Demeny families (West, North, East, South), for both sexes, at
-#'     the \eqn{e_0 = 60} standard level. Used as the relational logit
-#'     standard in \code{\link{om_estimate_index}}. Columns include
+#'     Coale-Demeny families (West, North, East, South), for both sexes,
+#'     at five mortality levels (\eqn{e_0 = 60, 70, 80, 90, 100}). Used as
+#'     the relational logit standard in \code{\link{om_estimate_index}},
+#'     selectable via its \code{e0} argument. Columns include
 #'     \code{Type_MLT}, \code{Family}, \code{Sex}, \code{E0}, \code{Age},
 #'     \code{lx}, and related life-table functions.
 #'   }

@@ -8,3 +8,5 @@
 ^\.git$
 ^\.gitignore$
 ^dev$
+^doc$
+^Meta$

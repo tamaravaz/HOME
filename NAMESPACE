@@ -2,6 +2,7 @@
 
 S3method(plot,OrphanhoodSensitivity)
 S3method(plot,OrphanhoodSensitivityFamily)
+S3method(print,LuyDataNeeds)
 S3method(print,OrphanhoodEstimate)
 S3method(print,OrphanhoodSensitivity)
 S3method(print,OrphanhoodSensitivityFamily)
@@ -9,10 +10,22 @@ S3method(summary,OrphanhoodEstimate)
 S3method(summary,OrphanhoodSensitivity)
 S3method(summary,OrphanhoodSensitivityFamily)
 export(app_HOME)
+export(om_calibrate_luy)
 export(om_dashboard)
 export(om_estimate_index)
+export(om_luy_data_needs)
+export(om_luy_intermediates)
+export(om_luy_validate_inputs)
 export(om_plot_linearity)
-export(om_sensitivity)
-export(om_sensitivity_family)
+export(om_sensitivity_Mn)
+export(om_sensitivity_modelLT)
 import(ggplot2)
-importFrom(stats,median)
+importFrom(stats,
+  aggregate,
+  coef,
+  complete.cases,
+  lm,
+  median,
+  optim,
+  uniroot
+)

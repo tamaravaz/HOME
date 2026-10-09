@@ -22,5 +22,5 @@ Displays estimated mortality indices across reference years for each model
 life table family, distinguished by line type.
 }
 \seealso{
-\code{\link{om_sensitivity_family}}
+\code{\link{om_sensitivity_modelLT}}
 }

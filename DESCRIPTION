@@ -1,46 +1,36 @@
 Package: HOME
 Title: Harmonized Orphanhood Mortality Estimation
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: 
     person("Tamara", "Vaz",
            email = "tamaravaz.m@gmail.com",
            role = c("aut", "cre"))
-Description: Implements indirect demographic methods for estimating adult
-    mortality from orphanhood data. The package includes the standard
-    Brass and Hill (1973) method
-    <https://scholar.google.com/scholar_lookup?&title=Estimating%20Adult%20Mortality%20from%20Orphanhood&pages=111-23&publication_year=1973&author=Brass%2CW.&author=Hill.%2CK.>,
-    the regression-based approach developed by Timaeus (1992)
-    <https://pubmed.ncbi.nlm.nih.gov/12317481/>, and the adjustments
-    proposed by Luy (2012) <doi:10.1007/s13524-012-0101-4> for
-    low-mortality populations. A relational model is used to harmonize
-    estimates into comparable adult mortality indicators. The package
-    also provides diagnostic tools to assess the sensitivity of results
-    to assumptions about the mean age of childbearing and the choice of
-    model life table family.
+Description: Implements indirect methods for estimating adult mortality from
+    orphanhood data: the Brass and Hill (1973) method, the regression-based
+    method of Timaeus (1992) <https://pubmed.ncbi.nlm.nih.gov/12317481/>,
+    and the extended orphanhood method of Luy (2012)
+    <doi:10.1007/s13524-012-0101-4> for low-mortality populations. Besides
+    the coefficients published by Luy for Italy, the package derives
+    context-specific coefficients (weighting factors, reference-period
+    parameters and the conversion of the mean age at childbearing of
+    surviving parents to that of all parents) for any population and survey
+    date from user-supplied period fertility, population, cohort mortality
+    and period life table data, following the procedure of Luy (2009) <https://www.oeaw.ac.at/fileadmin/subsites/Institute/VID/PDF/Publications/EDRP/edrp_2009_03.pdf>.
+    Estimates are harmonized into comparable adult mortality indicators
+    (30q30, 45q15 and e30) with a relational logit model, and diagnostic
+    tools assess the sensitivity of results to the mean age at childbearing
+    and to the choice of model life table family.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
-Imports:
-    ggplot2,
-    gridExtra
-Suggests:
-    shiny,
-    bslib,
-    plotly,
-    DT,
-    readxl,
-    writexl,
-    scales,
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown
+Imports: ggplot2, gridExtra
+Suggests: shiny, bslib, plotly, DT, readxl, writexl, scales, testthat
+        (>= 3.0.0), knitr, rmarkdown
 VignetteBuilder: knitr
 URL: https://github.com/tamaravaz/HOME
 BugReports: https://github.com/tamaravaz/HOME/issues
 NeedsCompilation: no
-Config/roxygen2/version: 8.0.0
-Packaged: 2026-05-29 14:07:52 UTC; tvaz
+Packaged: 2026-10-09 16:50:22 UTC; root
 Author: Tamara Vaz [aut, cre]
 Maintainer: Tamara Vaz <tamaravaz.m@gmail.com>
-Repository: CRAN
-Date/Publication: 2026-06-02 11:00:19 UTC
+Config/roxygen2/version: 8.1.1
